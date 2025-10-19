@@ -7,13 +7,17 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <div id="tuls">
-        <button id="load">LOAD</button>
+    <div id="tools">
+        <label for="load">load</label>
+        <input id="load" type="file">
         <button id="save">SAVE</button>
-        <button id="debug" class="active">DEBUG</button>
+        <button id="local" class="active">LOCAL</button>
         <button id="run">RUN</button>
+        <button id="clsCode">Clear code</button>
+        <input id="file" type="text" value="FileName">
     </div>
-    <div id="code"></div>
+    <textarea id="code"></textarea>
     <div id="monitor"></div>
+    <script type="application/javascript" src="script.js"></script>
 </body>
 </html>
