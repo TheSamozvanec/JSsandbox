@@ -4,7 +4,7 @@ body>div{
     width: 95vw;
     min-height:5vh;
 }
-#file{width:90vw}
+#file{width:50vw}
 #monitor{
     min-height:45vh;
     border: 1px solid red;
@@ -27,3 +27,16 @@ body>div{
 #tools #run{background: green;}
 #tools #run.err{background: red;}
 #load{display: none;}
+#tools .active, #tools .active:hover{background: green;}
+#keyboard {
+    position: absolute;
+    top: 10vh;
+    left: 50vw;
+    width: 45vw;
+    min_height: 20vh;
+    border: 1px solid black;
+}
+#keyboard button {
+    margin: 3px;
+    padding: 3px;
+}
