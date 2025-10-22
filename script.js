@@ -1,9 +1,12 @@
 'use strict'
-const setup={
+
+const settings={
 select:true, // выделение снипета
 description:true, // описание снипета
-closeSnip:true,
+closeSnip:true, // закрыть после вывода
 };
+
+
 let stop = false;
 const monitor=document.getElementById('monitor');
 const print = function (...rest){
@@ -118,7 +121,8 @@ function run (){
         {key:'fnc', fn:()=>{paste('function name( ) { }',
             'Объявление функции function declaration\nСтоит помнить о существовании  function expression\n const fn=function() {}\nи стрелочных функций ()=>, не имеющих контекста')}},
         //{key:'gen', fn:()=>{paste(`\nfunction *name(){\n\tyield 1;\n\tyield 2;\n\tyield 3\n}\n;let iter=name()`)}, bg:'green'}, 
-        {key:'itr', fn:()=>{paste(`[Symbol.iterator]=function *(){\n\tfor (let key in this){\n\t\tyield this[key];\n\t}\n}`)}, bg:'green'}, 
+        {key:'itr', fn:()=>{paste(`[Symbol.iterator]=function *(){\n\tfor (let key in this){\n\t\tyield this[key];\n\t}\n}\n`,
+            'Symbol.iterator встроен во все итерируемые объекты (for of)\nлн служет методом итерации в цикле и через [...]\nв случае необходимости можно встроить его в объект с применением дополнительной обработки ' )}, bg:'green'}, 
         {br:true},
         {key:'for', fn:()=>{paste('for(let i=0; i<10; i++){  }')}},
         {key:'f of', fn:()=>{paste('for(let i of array){  }')}},
@@ -211,12 +215,11 @@ function run (){
         let txt=code.value;
         code.value=txt.substring(0,cursor)+v+txt.substring(cursor);
         code.focus();
-        code.selectionStart = setup.select&&!opt? cursor:cursor+v.length;
+        code.selectionStart = settings.select&&!opt? cursor:cursor+v.length;
         code.selectionEnd = cursor+v.length;
         cursor=cursor+v.length
-        //code.selectionEnd = setup.select? cursor+v.length:cursor;
-        if (setup.description && d)print(d)
-        if (setup.closeSnip && !opt) keyboard();
+        if (settings.description && d)print(d)
+        if (settings.closeSnip && !opt) keyboard();
     }
     function defineKeyboard(level){
         dvKeyboard.innerHTML='';
