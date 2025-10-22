@@ -1,4 +1,9 @@
 'use strict'
+const setup={
+select:true, // выделение снипета
+description:true, // описание снипета
+closeSnip:true,
+};
 let stop = false;
 const monitor=document.getElementById('monitor');
 const print = function (...rest){
@@ -6,9 +11,16 @@ const print = function (...rest){
     for (let str of rest){
         res+=str+'\n';
     }
-    monitor.textContent+=res
+    monitor.innerHTML+=res
 }
 const cls = function () {monitor.textContent=''}
+
+function printObj(obj) {
+ for(let i in obj){  
+  monitor.innerHTML +='<b>'+i+': </b>'+obj[i]+'<br>'
+  }
+ }
+
 function run (){
     if (stop)return
     cls();
@@ -20,7 +32,7 @@ function run (){
         print(err)
     }
 }
-(function (){
+;(function (){
     let code=document.getElementById('code');
     let btLoad=document.getElementById('load');
     let btSave=document.getElementById('save');
@@ -30,7 +42,7 @@ function run (){
     let dvKeyboard=document.getElementById('keyboard');
     let file=document.getElementById('file');
     let btClsCode=document.getElementById('clsCode');
-    let local = localStorage.getItem('sandboxJSv1.0');
+    let local = localStorage.getItem('sandboxJSv2.0');
     let keyboardActive=false;
     
     file.value='NewFile-'+String((new Date()).getTime())+'.js';
@@ -70,12 +82,12 @@ function run (){
             if (err instanceof SyntaxError) {
                 print("Ошибка синтаксиса:", err.message);
             } else {
-                print(err)
-            }
+                 print(err)
+            }  
         }
     }
     function keyboard(){
-        this.classList.toggle('active');
+        btCode.classList.toggle('active');
         keyboardActive=!keyboardActive;
        if(keyboardActive) {
             dvKeyboard.hidden=false;
@@ -91,7 +103,7 @@ function run (){
     btLocal.addEventListener('click',()=>{
         cls();
         print('local storage:','_____________',local); 
-        localStorage.setItem('sandboxJSv1.0',local);
+        localStorage.setItem('sandboxJSv2.0',local);
     });
     btCode.addEventListener('click',keyboard);
     test();
@@ -99,100 +111,120 @@ function run (){
 
 
     //keyboard________________________________________________
+    let cursor=0;
     let levelOne = [
-        {key:'let', fn:()=>{code.value+='let'}},
-        {key:'con', fn:()=>{code.value+='const'}},
-        {key:'fnc', fn:()=>{code.value+='function name( ) { }'}},
-        //{key:'gen', fn:()=>{code.value+=`\nfunction *name(){\n\tyield 1;\n\tyield 2;\n\tyield 3\n}\n;let iter=name()`}}, 
-        {key:'itr', fn:()=>{code.value+=`[Symbol.iterator]=function *(){\n\tfor (let key in this){\n\t\tyield this[key];\n\t}\n}`}, bg:'green'}, 
-        {key:'for', fn:()=>{code.value+='for(let i=0; i<10; i++){  }'}},
-        {key:'f of', fn:()=>{code.value+='for(let i of array){  }'}},
-        {key:'f in', fn:()=>{code.value+='for(let i in obj){  }'}},
-        {key:'whi', fn:()=>{code.value+='while (i!=10){  }'}},
-        {key:'bre', fn:()=>{code.value+='break'}},
-        {key:'ctn', fn:()=>{code.value+='continue'}},
-        {key:'if', fn:()=>{code.value+='if(  ) {  }'}},
-        {key:'ife', fn:()=>{code.value+='if(  ) {\n  \n} else {  }'}, bg:'green'},
-        {key:'swt', fn:()=>{code.value+='switch (int){\n\tcase 1:\n\n\tbreak;\n\tcase 2:\n\n\tbreak; \n\tcase 3:\n\n\tbreak; \n}'}, bg:'green'},
-        {key:'type', fn:()=>{code.value+='typeof'}},
-        {key:'del', fn:()=>{code.value+='delete'}},
-        {key:'num', fn:()=>{code.value+='Number(  )'}},
-        {key:'str', fn:()=>{code.value+='String(  )'}},
-        {key:'boo', fn:()=>{code.value+='Boolean(  )'}},
-        {key:'prI', fn:()=>{code.value+='parseInt( \'str\' )'}},
-        {key:'prF', fn:()=>{code.value+='parseFloat( \'str\' )'}},
-        {key:'and', fn:()=>{code.value+='&&'}},
-        {key:'or', fn:()=>{code.value+='||'}},
+        {key:'let', fn:()=>{paste('let','Объявление переменной')}},
+        {key:'con', fn:()=>{paste('const','Объявление константы')}},
+        {key:'fnc', fn:()=>{paste('function name( ) { }',
+            'Объявление функции function declaration\nСтоит помнить о существовании  function expression\n const fn=function() {}\nи стрелочных функций ()=>, не имеющих контекста')}},
+        //{key:'gen', fn:()=>{paste(`\nfunction *name(){\n\tyield 1;\n\tyield 2;\n\tyield 3\n}\n;let iter=name()`)}, bg:'green'}, 
+        {key:'itr', fn:()=>{paste(`[Symbol.iterator]=function *(){\n\tfor (let key in this){\n\t\tyield this[key];\n\t}\n}`)}, bg:'green'}, 
+        {br:true},
+        {key:'for', fn:()=>{paste('for(let i=0; i<10; i++){  }')}},
+        {key:'f of', fn:()=>{paste('for(let i of array){  }')}},
+        {key:'f in', fn:()=>{paste('for(let i in obj){  }')}},
+        {key:'whi', fn:()=>{paste('while (i!=10){  }')}},
+        {key:'bre', fn:()=>{paste('break')}},
+        {key:'ctn', fn:()=>{paste('continue')}},
+        {br:true},
+        {key:'if', fn:()=>{paste('if(  ) {  }')}},
+        {key:'ife', fn:()=>{paste('if(  ) {\n  \n} else {  }')}, bg:'green'},
+        {key:'swt', fn:()=>{paste('switch (int){\n\tcase 1:\n\n\tbreak;\n\tcase 2:\n\n\tbreak; \n\tcase 3:\n\n\tbreak; \n}')}, bg:'green'},
+        {key:'and', fn:()=>{paste('&&')}},
+        {key:'or', fn:()=>{paste('||')}},
+        {key:'type', fn:()=>{paste('typeof')}},
+        {key:'num', fn:()=>{paste('Number(  )')}},
+        {key:'prI', fn:()=>{paste('parseInt( \'str\' )')}},
+        {key:'prF', fn:()=>{paste('parseFloat( \'str\' )')}},
+        {key:'str', fn:()=>{paste('String(  )')}},
+        {key:'boo', fn:()=>{paste('Boolean(  )')}},
+        {br:true}, 
         {key:'obj', fn:()=>{
-            code.value+='Object.';
+            paste('Object.','',true);
             defineKeyboard(levelObject);
         }, bg:'blue'}, 
         {key:'arr', fn:()=>{
-            code.value+='Array.';
+            paste('Array.','',true);
             defineKeyboard(levelArray);
         }, bg:'blue'},
-        {key:'tr-c', fn:()=>{code.value+='try {\n\n}catch(err){\n\n}'},bg:'green'},
-        {key:'trw', fn:()=>{code.value+='throw new Error(\'  \')'}},
-        //{key:'new', fn:()=>{code.value+='new'}},
-        {key:'cla', fn:()=>{code.value+='class'}},
-        {key:'ext', fn:()=>{code.value+='extends'}},
+        {key:'del', fn:()=>{paste('delete')}},
+        {key:'tr-c', fn:()=>{paste('try {\n\n}catch(err){\n\n}')},bg:'green'},
+        {key:'trw', fn:()=>{paste('throw new Error(\'  \')')}},
+        {key:'new', fn:()=>{paste('new')}},
+        {key:'cla', fn:()=>{paste('class')}},
+        {key:'ext', fn:()=>{paste('extends')}},
 
     ]
     let levelObject=[
         {key:'key',fn:()=>{
-            code.value+='keys(  )';
+            paste('keys(  )');
             defineKeyboard(levelOne);
         }, bg:'red'},
         {key:'val',fn:()=>{
-            code.value+='values(  )';
+            paste('values(  )');
             defineKeyboard(levelOne);
         }, bg:'red'},
         {key:'ent',fn:()=>{
-            code.value+='entries(  )';
+            paste('entries(  )');
             defineKeyboard(levelOne);
         }, bg:'red'},
         {key:'asi',fn:()=>{
-            code.value+='assign(target, src1, src2 )';
+            paste('assign(target, src1, src2 )');
             defineKeyboard(levelOne);
         }, bg:'red'},
         {key:'def',fn:()=>{
-            code.value+='defineProperty(obj, \'prop\',{writable: false})';
+            paste('defineProperty(obj, \'prop\',{writable: false})');
             defineKeyboard(levelOne);
         }, bg:'red'},
         {key:'frz',fn:()=>{
-            code.value+='freeze(  )';
+            paste('freeze(  )');
             defineKeyboard(levelOne);
         }, bg:'red'},
         {key:'seal',fn:()=>{
-            code.value+='seal(  )';
+            paste('seal(  )');
             defineKeyboard(levelOne);
         }, bg:'red'},
         {key:'prE',fn:()=>{
-            code.value+='preventExtensions(  )';
+            paste=('preventExtensions(  )');
             defineKeyboard(levelOne);
         }, bg:'red'},
 
     ]
     let levelArray = [
        {key:'isArray',fn:()=>{
-            code.value+='isArray(  )';
+            paste('isArray(  )');
             defineKeyboard(levelOne);
         }, bg:'red'}, 
         {key:'of',fn:()=>{
-            code.value+='of(  )';
+            paste('of(  )');
             defineKeyboard(levelOne);
         }, bg:'red'},
         {key:'from',fn:()=>{
-            code.value+='from(  )';
+            paste('from(  )');
             defineKeyboard(levelOne);
         }, bg:'red'},
     ]
 
-    defineKeyboard(levelOne)
-
+    defineKeyboard(levelOne);
+    function position(){cursor=code.selectionStart}
+    function paste(v,d,opt){
+        let txt=code.value;
+        code.value=txt.substring(0,cursor)+v+txt.substring(cursor);
+        code.focus();
+        code.selectionStart = setup.select&&!opt? cursor:cursor+v.length;
+        code.selectionEnd = cursor+v.length;
+        cursor=cursor+v.length
+        //code.selectionEnd = setup.select? cursor+v.length:cursor;
+        if (setup.description && d)print(d)
+        if (setup.closeSnip && !opt) keyboard();
+    }
     function defineKeyboard(level){
         dvKeyboard.innerHTML='';
         for (let key of level){
+            if (key.br){
+                dvKeyboard.appendChild(document.createElement('br'));
+                continue;
+            }
             let bt=document.createElement('button');
             bt.innerHTML=key.key;
             if(key.bg) bt.style.background=key.bg;
@@ -200,5 +232,6 @@ function run (){
             dvKeyboard.appendChild(bt);
         }
     }
-    
-}())
+    code.addEventListener('mouseup',()=>setTimeout(position,0));
+    code.addEventListener('keydown',()=>setTimeout(position,0));
+})()
