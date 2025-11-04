@@ -1,5 +1,5 @@
 {
-    "liveServer.settings.port": 5502,
+    "liveServer.settings.port": 5506,
     "cSpell.words": [
         "fakepath",
         "верен",
@@ -8,5 +8,7 @@
         "синтаксиса",
         "синтаксически",
         "файл"
-    ]
+    ],
+    "cSpell.language": "en,ru",
+    "cSpell.enabled": true
 }

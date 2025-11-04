@@ -1,11 +1,15 @@
 'use strict'
-
-const settings={
-select:true, // выделение снипета
-description:true, // описание снипета
-closeSnip:true, // закрыть после вывода
+const settingsDefault={
+    point:'select', // выделение снипета - select, начало снипета - start, конец - end, авто - index
+    description:true, // описание снипета
+    closeSnip:true, // закрыть после вывода
 };
-
+const settings={
+    point:'index', // выделение снипета
+    description:true, // описание снипета
+    closeSnip:true, // закрыть после вывода
+};
+Object.seal(settings);
 
 let stop = false;
 const monitor=document.getElementById('monitor');
@@ -14,15 +18,18 @@ const print = function (...rest){
     for (let str of rest){
         res+=str+'\n';
     }
-    monitor.innerHTML+=res
+    monitor.textContent+=res
 }
 const cls = function () {monitor.textContent=''}
 
-function printObj(obj) {
- for(let i in obj){  
-  monitor.innerHTML +='<b>'+i+': </b>'+obj[i]+'<br>'
-  }
- }
+const printObj = function(...rest) {
+    for (let obj of rest) {
+        for(let i in obj){  
+            monitor.innerHTML +='<b>'+i+': </b>'+obj[i]+'<br>'
+        }
+        monitor.innerHTML+='-----------<br>'
+    }
+}
 
 function run (){
     if (stop)return
@@ -35,6 +42,89 @@ function run (){
         print(err)
     }
 }
+
+function setup(cmd,set){
+    let settingsLocal=localStorage.getItem('SettingsSandboxJS');
+    cls();
+    try{
+
+        if(!cmd && !set){
+            if(settingsLocal){
+                let obj=JSON.parse(settingsLocal);
+                Object.assign(settings, obj);
+                print('Settings from local storage');
+                printObj(settings);
+            } else {
+                Object.assign(settings, settingsDefault);
+                print('Settings default');
+                printObj(settings);
+            }
+            return
+        }
+
+        if (typeof cmd==='object'){
+            Object.assign(settings, cmd);
+            print('Current settings:');
+            printObj(settings);
+            return
+        } else {
+            switch (cmd) {
+
+                case 'local':
+                    if (settingsLocal){
+                        let obj=JSON.parse(settingsLocal);
+                        Object.assign(settings,obj);
+                        print('Settings from local storage')
+                        printObj(settings) 
+                        return
+                    } else {
+                        print ('Сохраните настройки в localStorage\nМожно сохранить текущие настройки setup(\'save\'),\nЛибо передать объект настроек setup(\'save\',{\npoint:\'end\',\n ...\n})');
+                        return
+                    }
+                case  'save':
+                    if (set) Object.assign(settings, set);
+                    localStorage.setItem('SettingsSandboxJS',JSON.stringify(settings)); 
+                    print ('The settings are saved to the local storage');
+                    printObj(settings);
+                    return
+                case 'default':
+                    Object.assign(settings,settingsDefault);
+                    print('Settings default');
+                    printObj(settings);
+                    return
+                case 'delete':
+                    localStorage.removeItem('SettingsSandboxJS');
+                    Object.assign(settings,settingsDefault);
+                    print('Settings deleted from local storage', 'Settings default');
+                    printObj(settings);
+                    return
+                case 'help':
+                    cls();
+                    print(`
+Настройки редактора вызываются командой setup()
+В setup() можно передавать 2 параметра: 1 - ключь, 2 - объект
+Ключи: 
+   local - загрузка из локального хранилища
+   save - сохранение в локальное хранилище текущих настроек
+      если передать с объектом, настройки будут сохранены с внесенными изменениями
+   default - настройки по умолчанию 
+   delete - удаление настроек из локального хранилища и сброс \'по умолчанию\'
+   объект без ключа - текущая установка настроек, действует до перезагрузки страницы
+   help - помощь
+Объект имеет 3 свойства
+   point: курсор после выбора снипета end - конец снипета, start - начало снипета, select - выделить снипет, index - по настройкам снипета
+   description: true вывод описания снипета в монитор при выборе
+   closeSnip: true закрыть панель снипетов после выбора снипета 
+Пустой вызов setup() загрузит настройки хранилища или установит их по умолчанию (если их нет)
+                       `)
+            }
+        }
+    } catch (err) {
+        print(err)
+    }
+
+}
+
 ;(function (){
     let code=document.getElementById('code');
     let btLoad=document.getElementById('load');
@@ -47,6 +137,11 @@ function run (){
     let btClsCode=document.getElementById('clsCode');
     let local = localStorage.getItem('sandboxJSv2.0');
     let keyboardActive=false;
+    let specColor = '#805499ff';
+    let syntColor = 'green';
+    let groupColor = 'yellow';
+    let subgropColor = 'blue';
+    let retColor = 'red';
     
     file.value='NewFile-'+String((new Date()).getTime())+'.js';
     if (local) code.value=local;
@@ -71,9 +166,28 @@ function run (){
 
     function clsCode(){code.value=''}
 
-    function test(){
+    function test(e){
+        let data=e?.data
         cls();
         local=code.value;
+        if(data){
+            switch (data){
+                case '\'':
+                    paste('\'')
+                break;
+                case '(':
+                    paste(')')
+                break;
+                case '[':
+                    paste(']')
+                break;
+                case '{':
+                    paste('}')
+                break;
+                case '"':
+                    paste('"')
+            }
+        }
         try {
             new Function(code.value); 
             print("Код синтаксически верен.");
@@ -87,6 +201,13 @@ function run (){
             } else {
                  print(err)
             }  
+        }
+        function paste(v){
+            let txt=code.value;
+            code.value=txt.substring(0,cursor+1)+v+txt.substring(cursor+1);
+            code.selectionStart = cursor+v.length;
+            code.selectionEnd = cursor+v.length;
+            cursor= cursor+v.length;
         }
     }
     function keyboard(){
@@ -116,108 +237,255 @@ function run (){
     //keyboard________________________________________________
     let cursor=0;
     let levelOne = [
-        {key:'let', fn:()=>{paste('let','Объявление переменной')}},
-        {key:'con', fn:()=>{paste('const','Объявление константы')}},
-        {key:'fnc', fn:()=>{paste('function name( ) { }',
-            'Объявление функции function declaration\nСтоит помнить о существовании  function expression\n const fn=function() {}\nи стрелочных функций ()=>, не имеющих контекста')}},
+
+        {key:'let', fn:()=>{paste('let','\nОбъявление переменной')}},
+       
+        {key:'con', fn:()=>{paste('const','\nОбъявление константы')}},
+        
+        {key:'fnc', fn:()=>{paste(
+'\nfunction name( ) { }',`
+Объявление функции function declaration
+Стоит помнить о существовании  function expression
+const fn=function() {}
+и стрелочных функций const fn = ()=>{}.
+Стрелочные функции не имеют контекста this`,
+false,14)}},
+       
         //{key:'gen', fn:()=>{paste(`\nfunction *name(){\n\tyield 1;\n\tyield 2;\n\tyield 3\n}\n;let iter=name()`)}, bg:'green'}, 
-        {key:'itr', fn:()=>{paste(`[Symbol.iterator]=function *(){\n\tfor (let key in this){\n\t\tyield this[key];\n\t}\n}\n`,
-            'Symbol.iterator встроен во все итерируемые объекты (for of)\nлн служет методом итерации в цикле и через [...]\nв случае необходимости можно встроить его в объект с применением дополнительной обработки ' )}, bg:'green'}, 
+       
+        {key:'itr', fn:()=>{paste(
+`[Symbol.iterator]=function *(){
+  for (let key in this){
+    
+    yield this[key];
+  }
+}\n`,
+`Symbol.iterator встроен во все итерируемые объекты (for of)
+он служет методом итерации в цикле и через rest [...]
+в случае необходимости можно встроить его в объект 
+с применением дополнительной обработки
+`,
+false, 60)}, bg:syntColor}, 
+        
         {br:true},
-        {key:'for', fn:()=>{paste('for(let i=0; i<10; i++){  }')}},
-        {key:'f of', fn:()=>{paste('for(let i of array){  }')}},
-        {key:'f in', fn:()=>{paste('for(let i in obj){  }')}},
-        {key:'whi', fn:()=>{paste('while (i!=10){  }')}},
-        {key:'bre', fn:()=>{paste('break')}},
-        {key:'ctn', fn:()=>{paste('continue')}},
+
+        {key:'for', fn:()=>{paste('for(let i=0; i<10; i++){  }\n','',false, 24)}},
+
+        {key:'f of', fn:()=>{paste('for(let elem of array){  }\n','',false,23)}},
+
+        {key:'f in', fn:()=>{paste('for(let key in obj){  }\n','',false,20)}},
+
+        {key:'whi', fn:()=>{paste('while (i!=10){  }\n',
+`
+Цикл, который будет выполняться до тех пор, пока выполняется условие в скобках
+`,
+            false,14)}},
+
+        {key:'bre', fn:()=>{paste('break;')}},
+
+        {key:'ctn', fn:()=>{paste('continue;')}},
+
         {br:true},
-        {key:'if', fn:()=>{paste('if(  ) {  }')}},
-        {key:'ife', fn:()=>{paste('if(  ) {\n  \n} else {  }')}, bg:'green'},
-        {key:'swt', fn:()=>{paste('switch (int){\n\tcase 1:\n\n\tbreak;\n\tcase 2:\n\n\tbreak; \n\tcase 3:\n\n\tbreak; \n}')}, bg:'green'},
+
+        {key:'if', fn:()=>{paste('if(  ) {  }','стандартное условие',false, 4)}},
+
+        {key:'ife', fn:()=>{paste('if(  ) {\n  \n} else {  }',
+`Условие с альтернативой. Если условие не верное - выполняется код else.
+Данная конструкция полезна, когда есть код, который выполняется только
+в случае не выполнения условия. 
+`,false,4)}, bg:syntColor},
+
+        {key:'swt', fn:()=>{paste('\nswitch (int){\n  case 1:\n\n  break;\n  case 2:\n\n  break; \n  case 3:\n\n  break; \n  default:\n\n}',
+`Многовариантное условие. В скобках указывается переменная
+Каждый кейс содержит значение переменной и блок, который будет выполнен при указанном значении
+Блок default будет выполнен, если ниодно значение не совпало
+`,false,12)}, bg:syntColor},
+
         {key:'and', fn:()=>{paste('&&')}},
+
         {key:'or', fn:()=>{paste('||')}},
-        {key:'type', fn:()=>{paste('typeof')}},
-        {key:'num', fn:()=>{paste('Number(  )')}},
-        {key:'prI', fn:()=>{paste('parseInt( \'str\' )')}},
-        {key:'prF', fn:()=>{paste('parseFloat( \'str\' )')}},
+
+        {key:'type', fn:()=>{paste('typeof',' получение типа переменной print (typeof int) или let type=typeof int')}},
+
+        {key:'num', fn:()=>{paste('Number(  )','преобразование строки в число \'123\'=>123',false,7)}},
+
+        {key:'prI', fn:()=>{paste('parseInt( \'str\' )', 
+`Получение целого числа из строки числа с единицами измерения
+parseint('10px') => 10
+`)}},
+
+        {key:'prF', fn:()=>{paste('parseFloat( \'str\' )',
+`Получение дробного числа из строки числа с единицами измерения
+parseint('10.3kg') => 10.3
+`,)}},
+
         {key:'str', fn:()=>{paste('String(  )')}},
+
         {key:'boo', fn:()=>{paste('Boolean(  )')}},
+
         {br:true}, 
+
         {key:'obj', fn:()=>{
             paste('Object.','',true);
             defineKeyboard(levelObject);
-        }, bg:'blue'}, 
+        }, bg:subgropColor}, 
+
         {key:'arr', fn:()=>{
             paste('Array.','',true);
             defineKeyboard(levelArray);
-        }, bg:'blue'},
+        }, bg:subgropColor},
+
         {key:'del', fn:()=>{paste('delete')}},
-        {key:'tr-c', fn:()=>{paste('try {\n\n}catch(err){\n\n}')},bg:'green'},
+
+        {key:'tr-c', fn:()=>{paste('try {\n\n}catch(err){\n\n}')},bg:syntColor},
+
         {key:'trw', fn:()=>{paste('throw new Error(\'  \')')}},
+
         {key:'new', fn:()=>{paste('new')}},
+
         {key:'cla', fn:()=>{paste('class')}},
+
         {key:'ext', fn:()=>{paste('extends')}},
 
+        
+        
+        {key:'SETUP', fn:()=>{
+
+            defineKeyboard(levelSettings)}, bg:'yellow'}
+        
     ]
     let levelObject=[
         {key:'key',fn:()=>{
             paste('keys(  )');
             defineKeyboard(levelOne);
-        }, bg:'red'},
+        }, bg:retColor},
+
         {key:'val',fn:()=>{
             paste('values(  )');
             defineKeyboard(levelOne);
-        }, bg:'red'},
+        }, bg:retColor},
+
         {key:'ent',fn:()=>{
             paste('entries(  )');
             defineKeyboard(levelOne);
-        }, bg:'red'},
+        }, bg:retColor},
+
         {key:'asi',fn:()=>{
             paste('assign(target, src1, src2 )');
             defineKeyboard(levelOne);
-        }, bg:'red'},
+        }, bg:retColor},
+
         {key:'def',fn:()=>{
             paste('defineProperty(obj, \'prop\',{writable: false})');
             defineKeyboard(levelOne);
-        }, bg:'red'},
+        }, bg:retColor},
+
         {key:'frz',fn:()=>{
             paste('freeze(  )');
             defineKeyboard(levelOne);
-        }, bg:'red'},
+        }, bg:retColor},
+
         {key:'seal',fn:()=>{
             paste('seal(  )');
             defineKeyboard(levelOne);
-        }, bg:'red'},
+        }, bg:retColor},
+
         {key:'prE',fn:()=>{
             paste=('preventExtensions(  )');
             defineKeyboard(levelOne);
-        }, bg:'red'},
+        }, bg:retColor},
 
     ]
     let levelArray = [
        {key:'isArray',fn:()=>{
             paste('isArray(  )');
             defineKeyboard(levelOne);
-        }, bg:'red'}, 
+        }, bg:retColor},
+
         {key:'of',fn:()=>{
             paste('of(  )');
             defineKeyboard(levelOne);
-        }, bg:'red'},
+        }, bg:retColor},
+
         {key:'from',fn:()=>{
             paste('from(  )');
             defineKeyboard(levelOne);
-        }, bg:'red'},
+        }, bg:retColor},
+    ]
+
+    let levelSettings =[
+
+        {key:'...',fn:()=>{
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'local', fn:()=>{setup('local')}, bg:specColor},
+
+        {key:'save', fn:()=>{setup('save')}, bg:specColor},
+
+        {key:'default', fn:()=>{setup('default')}, bg:specColor},
+
+        {key:'delete', fn:()=>{setup('delete')}, bg:specColor},
+
+        {key:'help', fn:()=>{setup('help')}, bg:specColor},
+
+        {br:true},
+
+        {key:'setup', fn:()=>{paste(
+`setup({
+   point:'select',
+   description:true,
+   closeSnip:false
+})
+            `,'',false,10)}, bg:syntColor},
+
+       {key:'start', fn:()=>{settings.point='start'; printObj(settings)}},
+
+       {key:'end', fn:()=>{settings.point='end'; printObj(settings)}},
+
+       {key:'select', fn:()=>{settings.point='select'; printObj(settings)}}, 
+       
+       {key:'index', fn:()=>{settings.point='index'; printObj(settings)}},
+
+       {key:'closeSnip', fn:()=>{settings.closeSnip=!settings.closeSnip; printObj(settings)}},
+
+       {key:'desc', fn:()=>{settings.description=!settings.description; printObj(settings)}},
+
     ]
 
     defineKeyboard(levelOne);
     function position(){cursor=code.selectionStart}
-    function paste(v,d,opt){
+    function paste(v,d,opt, index){
         let txt=code.value;
         code.value=txt.substring(0,cursor)+v+txt.substring(cursor);
         code.focus();
-        code.selectionStart = settings.select&&!opt? cursor:cursor+v.length;
-        code.selectionEnd = cursor+v.length;
-        cursor=cursor+v.length
+        try{
+            switch (settings.point){
+                case 'select':
+                    code.selectionStart = !opt? cursor:cursor+v.length;
+                    code.selectionEnd = cursor+v.length;
+                    cursor=cursor+v.length;
+                break;
+                case 'start':
+                    code.selectionStart = !opt? cursor:cursor+v.length;
+                    code.selectionEnd = !opt? cursor:cursor+v.length;
+                    cursor= !opt? cursor:cursor+v.length;
+                break;
+                case 'end':
+                    code.selectionStart = cursor+v.length;
+                    code.selectionEnd = cursor+v.length;
+                    cursor= cursor+v.length;
+                break;
+                case 'index':
+                    code.selectionStart = !opt && index? cursor+index:cursor+v.length;
+                    code.selectionEnd = !opt && index? cursor+index:cursor+v.length;
+                    cursor = !opt && index? cursor+index:cursor+v.length;
+                break;
+                default:
+                    throw new TypeError('Invalid settings!!! Invalid \'point\' property value, use: \'select\', \'start\', \'end\', or \'index\'')
+            }
+        } catch (err) {cls(); print(err)}
+        
         if (settings.description && d)print(d)
         if (settings.closeSnip && !opt) keyboard();
     }
@@ -230,7 +498,7 @@ function run (){
             }
             let bt=document.createElement('button');
             bt.innerHTML=key.key;
-            if(key.bg) bt.style.background=key.bg;
+            if(key.bg) bt.style.backgroundColor=key.bg;
             bt.addEventListener('click',key.fn)
             dvKeyboard.appendChild(bt);
         }
