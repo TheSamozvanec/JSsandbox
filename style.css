@@ -16,8 +16,8 @@ body>div{
     margin: 5px;
     padding: 3px;
 }
-#tools>button:hover, label:hover{background: rgba(220, 221, 221, 1);}
-#tools>button:active, label:active{background: rgba(95, 95, 97, 1);}
+#tools>button:hover, #lab:hover{background: rgba(220, 221, 221, 1);}
+#tools>button:active, #lab:active{background: rgba(95, 95, 97, 1);}
 #code{
     display: block;
     margin: 5px auto;
@@ -29,14 +29,24 @@ body>div{
 #load{display: none;}
 #tools .active, #tools .active:hover{background: green;}
 #keyboard {
+    background: rgb(6, 5, 107);
     position: absolute;
     top: 10vh;
-    left: 50vw;
-    width: 45vw;
+    left: 80vw;
+    width: 157px;
     min_height: 20vh;
     border: 1px solid black;
 }
 #keyboard button {
+    border-radius:5px;
     margin: 3px;
     padding: 3px;
+    margin-bottom:4px;
+    box-shadow: 3px 3px 2px 2px; 
+}
+@media only screen and (max-device-width: 480px) {
+  #keyboard{
+    left: 50vw;
+    width: 46vw;
+  }
 }
