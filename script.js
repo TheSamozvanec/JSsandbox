@@ -142,6 +142,8 @@ function setup(cmd,set){
     let btCode=document.getElementById('cmd');
     let dvKeyboard=document.getElementById('keyboard');
     let file=document.getElementById('file');
+    let curLf=document.getElementById('curLf');
+    let curRt=document.getElementById('curRt');
     let btClsCode=document.getElementById('clsCode');
     let local = localStorage.getItem('sandboxJSv2.0');
     let keyboardActive=false;
@@ -382,21 +384,25 @@ monitor.innerHTML=\`
 
 \``,'',true,21);
             defineKeyboard(levelHTML)
-        }, bg:groupColor},
+        }, bg:subgropColor},
+
+        {key:'HTML', fn:()=>{defineKeyboard(levelHTML)}, bg:groupColor},
+
+        {br:true},
         
         {key:'CSS', fn:()=>{paste(
 `
 style.innerHTML=\`
-.monitor .my-class {
+#monitor .my-class {
 
 }
 \``,'',true,37);
             defineKeyboard(levelCSS)
-        }, bg:groupColor},
+        }, bg:subgropColor},
 
-        {key:'SETUP', fn:()=>{
+        {key:'CSS', fn:()=>{defineKeyboard(levelCSS)}, bg:groupColor},
 
-            defineKeyboard(levelSettings)}, bg:'yellow'},
+        {key:'SETUP', fn:()=>{defineKeyboard(levelSettings)}, bg:'yellow'},
 
     ]
     //____________________________________________________
@@ -593,7 +599,7 @@ radio - радиопереключатель
 
          {key:'monitor', fn:()=>{paste(
 `
-.monitor {
+#monitor {
 
 }
 `,'селектор монитор, для расположенных внутри нижнего окна элементов', false,10)},bg:syntColor},
@@ -647,7 +653,7 @@ sticky - Липкое позиционирование.
 
         {br:true},
 
-        {key:'dys', fn:()=>{paste('dysplay: flex;',
+        {key:'dis', fn:()=>{paste('display: flex;',
 `
 block - Блочный элемент.
 inline - Строчный элемент.
@@ -804,8 +810,59 @@ step-end - Анимации нет,
 steps - Значение свойства изменяется скачками.
 cubic-bezier - Кривая Безье.
 `)}},
+        {key:'usSel', fn:()=>{paste('user-select:',
+`
+Выделение текста и других элементов
+none - Текст не выделяется.
+contain - Выделение, начатое внутри элемента 
+не выйдет за пределы этого элемента.
+all - Если двойной клик произошел во вложенном элементе, 
+будет выбрано все содержимое родителя с этим значением свойства.
+auto - Вычисляемое значение, автоматически определяется 
+следующим образом: для псевдоэлементов after и before 
+значение равно none, для редактируемого элемента значение 
+равно contain, если у родителя элемента значение 
+all или none - такое же будет и у самого элемента, 
+иначе значение будет text.
+text - Пользователь может выделить текст в элементе.
+`)}},
 
- //       {key:'trans', fn:()=>{paste('translate()','\nтрансформации - функция смещение ед - px',false,5)}}
+        {key:'poEv', fn:()=>{paste('pointer-events:','\nреакция на событие мыши none/auto')}},
+
+        {key:'cur', fn:()=>{paste('cursor:',
+`
+Вид курсора над элементом несколько интересных:
+pointer - палец
+grabbing - рука зажата
+grab - рука
+вообще их очень много, надо гуглить)))
+
+`)}},
+
+        {br:true},
+
+        {br:true},
+
+        {key:'link', fn:()=>{paste(':link','\nпсевдокласс - непосещенные ссылки')}},
+
+        {key:'vis', fn:()=>{paste(':visited','\nпсевдокласс - посещенные ссылки')}},
+
+        {key:'hover', fn:()=>{paste(':hover','\nпсевдокласс - курсор на элементе')}},
+
+        {key:'active', fn:()=>{paste(':active','\nпсевдокласс - активный элемент (нажата лквая кнопка)')}},
+
+        {key:'focus', fn:()=>{paste(':focus','\nпсевдокласс - элемент формы в фокусе')}},
+
+        {key:'focWit', fn:()=>{paste(':focus-within','\nпсевдокласс - родитель элемента формы в фокусе')}},
+
+        {key:'check', fn:()=>{paste(':checked','\nпсевдокласс - отмеченный флажек (радио)')}},
+
+        {key:'disa', fn:()=>{paste(':disabled','\nпсевдокласс - неактивный инпут')}},
+
+        {key:'enab', fn:()=>{paste(':enabled','\nпсевдокласс - активный инпут')}},
+
+        {key:'sel', fn:()=>{paste('::selection','\nпсевдоэлемент - выделенный текст')}},
+        
     ];
     //____________________________________________________
     let levelObject=[
@@ -1006,5 +1063,17 @@ _____________________________________________________
     }
     code.addEventListener('mouseup',()=>setTimeout(position,0));
     code.addEventListener('keydown',()=>setTimeout(position,0));
-    setup()
+    curLf.addEventListener('click',()=>{
+        cursor-=1;
+        code.focus();
+        code.selectionStart=cursor;
+        code.selectionEnd=cursor;
+    });
+    curRt.addEventListener('click',()=>{
+        cursor+=1;
+        code.focus();
+        code.selectionStart=cursor;
+        code.selectionEnd=cursor;
+    });
+    setup();
 })()
