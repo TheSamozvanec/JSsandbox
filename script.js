@@ -3,13 +3,13 @@ const settingsDefault={
     point:'select', // выделение снипета - select, начало снипета - start, конец - end, авто - index
     description:true, // описание снипета
     closeSnip:true, // закрыть после вывода
-    autosave:true,
+    autosave:true, // автосохранение кода в LS при RUN
 };
 const settings={
     point:'index', // выделение снипета
     description:true, // описание снипета
     closeSnip:true, // закрыть после вывода
-    autosave:true,
+    autosave:true, // автосохранение кода в LS при RUN
 };
 Object.seal(settings);
 
@@ -100,7 +100,7 @@ function setup(cmd,set){
                     printObj(settings);
                     return
                 case 'delete':
-                    localStorage.removeItem('\nSettingsSandboxJS');
+                    localStorage.removeItem('SettingsSandboxJS');
                     Object.assign(settings,settingsDefault);
                     print('Settings deleted from local storage', 'Settings default');
                     printObj(settings);
@@ -312,6 +312,8 @@ i++ шаг прирощения можно i+=0.5 или другое
 
         {key:'ctn', fn:()=>{paste('continue;')}},
 
+         {key:'new', fn:()=>{paste('new')}},
+
         {br:true},
 
         {key:'if', fn:()=>{paste('if(  ) {  }','\nстандартное условие',false, 4)}},
@@ -354,7 +356,7 @@ parseint('10.3kg') => 10.3
 
         {key:'boo', fn:()=>{paste('Boolean(  )')}},
 
-        {br:true}, 
+//        {br:true}, 
 
         {key:'obj', fn:()=>{
             paste('Object.','статические методы объектов',true,7);
@@ -366,46 +368,167 @@ parseint('10.3kg') => 10.3
             defineKeyboard(levelArray);
         }, bg:subgropColor},
 
-        {key:'del', fn:()=>{paste('delete')}},
+//        {key:'del', fn:()=>{paste('delete')}},
 
         {key:'tr-c', fn:()=>{paste('try {\n\n}catch(err){\n\n}')},bg:syntColor},
 
         {key:'trw', fn:()=>{paste('throw new Error(\'  \')')}},
 
-        {key:'new', fn:()=>{paste('new')}},
-
         {key:'cla', fn:()=>{paste('class')}},
 
         {key:'ext', fn:()=>{paste('extends')}},
 
-        {key:'HTML', fn:()=>{paste(
+        {key:'Math', fn:()=>{
+            paste('Math.','\nМатематические функции и константы',true,5);
+            defineKeyboard(levelMath);
+        }, bg:subgropColor},
+
+        {key:'STR', fn:()=>{
+            defineKeyboard(levelSTR);
+        }, bg:groupColor},
+
+        {key:'HTML', fn:()=>{
+         if(!hasHTML()){paste(
 `
 monitor.innerHTML=\`
 
 \``,'',true,21);
+            }
             defineKeyboard(levelHTML)
-        }, bg:subgropColor},
-
-        {key:'HTML', fn:()=>{defineKeyboard(levelHTML)}, bg:groupColor},
-
-        {br:true},
+        }, bg:groupColor},
         
-        {key:'CSS', fn:()=>{paste(
+        {key:'CSS', fn:()=>{
+           if(!hasCSS()) {paste(
 `
 style.innerHTML=\`
 #monitor .my-class {
 
 }
 \``,'',true,37);
+            }
             defineKeyboard(levelCSS)
-        }, bg:subgropColor},
-
-        {key:'CSS', fn:()=>{defineKeyboard(levelCSS)}, bg:groupColor},
+        }, bg:groupColor},
 
         {key:'SETUP', fn:()=>{defineKeyboard(levelSettings)}, bg:'yellow'},
 
     ]
-    //____________________________________________________
+    //Math____________________________________________________
+    let levelMath=[
+
+        {key:'rnd',fn:()=>{
+            paste('random(  )','\nПолучайные числа',false,8);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'round',fn:()=>{
+            paste('round(  )','\nОкругление до ближайшего целого',false,7);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'ceil',fn:()=>{
+            paste('ceil(  )','\nОкругление в большую сторону',false,6);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'floor',fn:()=>{
+            paste('floor(  )','\nОкругление в меньшую сторону',false,7);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'sqrt',fn:()=>{
+            paste('sqrt(  )','\nКвадратный корень',false,6);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'sqrt',fn:()=>{
+            paste('sqrt(  )','\nКвадратный корень',false,6);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'max',fn:()=>{
+            paste('max(  )','\nМаксимум max(n1,n2...n) можно max(...[n1,n2])',false,5);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'min',fn:()=>{
+            paste('min(  )','\nМинимум min(n1,n2...n) можно min(...[n1,n2])',false,5);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'abs',fn:()=>{
+            paste('abs(  )','\nМодуль числа',false,5);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'sin',fn:()=>{
+            paste('sin(  )','\nСинус (аргумент в радианах)',false,5);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'cos',fn:()=>{
+            paste('cos(  )','\nКосинус (аргумент в радианах)',false,5);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'tan',fn:()=>{
+            paste('tan(  )','\nТангенс (аргумент в радианах)',false,5);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'asin',fn:()=>{
+            paste('asin(  )','\nАрксинус',false,6);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'acos',fn:()=>{
+            paste('acos(  )','\nАрккосинус',false,6);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'atan',fn:()=>{
+            paste('atan(  )','\nАрктангенс',false,6);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'exp',fn:()=>{
+            paste('exp(  )','\nВозведение \'е\' в степень',false,5);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'log',fn:()=>{
+            paste('log(  )','\nНатуральный логорифм',false,5);
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'PI',fn:()=>{
+            paste('PI','\nПи 3.14');
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'E',fn:()=>{
+            paste('E','\n\'e\' 2.718');
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'SQRT2',fn:()=>{
+            paste('SQRT2','\nКорень из 2');
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+    ];
+    //STR____________________________________________________
+    let levelSTR=[
+
+        {key:'...',fn:()=>defineKeyboard(levelOne),bg:retColor},
+
+        {key:'Fix',fn:()=>{paste('.toFixed(  )','\nФиксированное округление num.toFixed(n)// n-знаков после \'.\'',false,10)}},
+
+        {key:'Preci',fn:()=>{paste('.toPrecision(  )','\nФиксированное округление num.toPrecision(n)//n-знаков всего',false,14);}},   
+        
+
+        
+    ];
+    //HTML____________________________________________________
     let levelHTML =[
         {key:'...',fn:()=>{
             defineKeyboard(levelOne);
@@ -591,7 +714,7 @@ radio - радиопереключатель
 но не изменит количество точек на холсте!!!
 `)}},
     ];
-    //____________________________________________________
+    //CSS__________________________________________________
     let levelCSS =[
         {key:'...',fn:()=>{
             defineKeyboard(levelOne);
@@ -727,6 +850,8 @@ stretch - Блоки растянуты, занимая все доступно�
 
         {key:'grRw', fn:()=>{paste('grid-row: 1/3;','\nЗадает начальную и конечную позиции элемента в гриде или сетке по рядам.')}},
 
+        {key:'txtAl', fn:()=>{paste('text-align;','\nВыравнивание текста | center | left | right | justify | auto | start | end.')}},
+
         {br:true},
 
         {key:'border', fn:()=>{paste('border: 1px solid black;',
@@ -775,17 +900,9 @@ inset - Необязательный параметр.
 
         {br:true},
 
-        {key:'transform', fn:()=>{paste('transform:','\nтрансформации функция(x, y)')}},
-
-        {key:'rotate', fn:()=>{paste('rotate()','\nтрансформации - функция поворота ед - deg',false,7)}},
-
-        {key:'scale', fn:()=>{paste('scale()','\nтрансформации - функция увеличение/уменьшение ед - 0.5',false,6)}},
-
-        {key:'skew', fn:()=>{paste('skew()','\nтрансформации - функция наклон ед - deg',false,5)}},
-
-        {key:'trans', fn:()=>{paste('translate()','\nтрансформации - функция смещение ед - px',false,5)}},
-
-        {br:true},
+        {key:'transform', fn:()=>{
+            defineKeyboard(levelTransformCss)
+        }, bg:groupColor},    
 
         {key:'transition', fn:()=>{paste('transition:all 0.8s ease;',
 `
@@ -843,6 +960,8 @@ grab - рука
 
         {br:true},
 
+         {key:'sel', fn:()=>{paste('::selection','\nпсевдоэлемент - выделенный текст')}},
+
         {key:'link', fn:()=>{paste(':link','\nпсевдокласс - непосещенные ссылки')}},
 
         {key:'vis', fn:()=>{paste(':visited','\nпсевдокласс - посещенные ссылки')}},
@@ -860,28 +979,55 @@ grab - рука
         {key:'disa', fn:()=>{paste(':disabled','\nпсевдокласс - неактивный инпут')}},
 
         {key:'enab', fn:()=>{paste(':enabled','\nпсевдокласс - активный инпут')}},
-
-        {key:'sel', fn:()=>{paste('::selection','\nпсевдоэлемент - выделенный текст')}},
-        
+       
     ];
-    //____________________________________________________
+
+//TransformCss___________________________________________________________________
+    let levelTransformCss=[
+
+         {key:'...',fn:()=>{
+            defineKeyboard(levelCSS);
+        }, bg:retColor},
+
+        {br:true},
+
+        {key:'transform', fn:()=>{paste('transform:','\nтрансформации функция(x, y)')}},
+
+        {key:'tran-orig', fn:()=>{paste('transform-origin:','\nзадает точку, относительно которой будут происходить трансформации элемента, задаваемые свойством transform. X Y Z')}},
+
+        {br:true},
+
+        {br:true},
+
+        {key:'rot', fn:()=>{paste('rotate()','\nтрансформации - функция поворота ед - deg',false,7)}},
+
+        {key:'scl', fn:()=>{paste('scale()','\nтрансформации - функция увеличение/уменьшение ед - 0.5',false,6)}},
+
+        {key:'skew', fn:()=>{paste('skew()','\nтрансформации - функция наклон ед - deg',false,5)}},
+
+        {key:'trans', fn:()=>{paste('translate()','\nтрансформации - функция смещение ед - px',false,5)}},
+
+        {br:true},
+
+    ];
+//Object____________________________________________________
     let levelObject=[
-        {key:'key',fn:()=>{
+        {key:'keys',fn:()=>{
             paste('keys(  )','Массив ключей (свойств) объекта',false, 6);
             defineKeyboard(levelOne);
         }, bg:retColor},
 
-        {key:'val',fn:()=>{
+        {key:'values',fn:()=>{
             paste('values(  )','Массив значений объекта',false, 8);
             defineKeyboard(levelOne);
         }, bg:retColor},
 
-        {key:'ent',fn:()=>{
+        {key:'entries',fn:()=>{
             paste('entries(  )','Двухмерный массив [[key,val],[key,val]...]',false,9);
             defineKeyboard(levelOne);
         }, bg:retColor},
 
-        {key:'asi',fn:()=>{
+        {key:'asign',fn:()=>{
             paste('assign(target, src1, src2 )',
 `
 Поверхностное копирование/слияние объектов
@@ -894,7 +1040,7 @@ src - источники
             defineKeyboard(levelOne);
         }, bg:retColor},
 
-        {key:'def',fn:()=>{
+        {key:'defineProp',fn:()=>{
             paste('defineProperty(obj, \'prop\',{writable: false})',
 `
 Позволяет добавлять новые свойства объектам или изменять существующие свойства,
@@ -937,7 +1083,7 @@ _____________________________________________________
             defineKeyboard(levelOne);
         }, bg:retColor},
 
-        {key:'prE',fn:()=>{
+        {key:'prevExten',fn:()=>{
             paste('preventExtensions(  )',
 `
 - Предотвращение расширения: Невозможно добавить новые собственные свойства объекта.
@@ -950,7 +1096,7 @@ _____________________________________________________
         }, bg:retColor},
 
     ]
-    //___________________________________________________
+//Array____________________________________________
     let levelArray = [
        {key:'isArray',fn:()=>{
             paste('isArray(  )');
@@ -967,7 +1113,7 @@ _____________________________________________________
             defineKeyboard(levelOne);
         }, bg:retColor},
     ]
-//_______________________________________________________________________________________________________________
+//Settings________________________________________________________________________________________________________
     let levelSettings =[
 
         {key:'...',fn:()=>{
@@ -1075,5 +1221,29 @@ _____________________________________________________
         code.selectionStart=cursor;
         code.selectionEnd=cursor;
     });
+    function hasCSS(){
+        let css=code.value.indexOf('style.innerHTML=');
+        if (css!==-1){ 
+            cursor=css+18;
+            code.focus();
+            code.selectionStart=cursor;
+            code.selectionEnd=cursor;
+            return true
+        } else {
+            return false
+        }
+    }
+    function hasHTML(){
+        let html=code.value.indexOf('monitor.innerHTML=');
+        if (html!==-1){ 
+            cursor=html+20;
+            code.focus();
+            code.selectionStart=cursor;
+            code.selectionEnd=cursor;
+            return true
+        } else {
+            return false
+        }
+    }
     setup();
 })()
