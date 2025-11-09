@@ -255,11 +255,11 @@ function setup(cmd,set){
     let cursor=0;
     let levelOne = [
 
-        // {key:'let', fn:()=>{paste('let','\nОбъявление переменной')}},
+        {key:'let', fn:()=>{paste('let','\nОбъявление переменной')}},
        
-        // {key:'con', fn:()=>{paste('const','\nОбъявление константы')}},
+        {key:'con', fn:()=>{paste('const','\nОбъявление константы')}},
         
-        {key:'fnc', fn:()=>{paste(
+        {key:'func', fn:()=>{paste(
 '\nfunction name( ) { }',
 `
 Объявление функции function declaration
