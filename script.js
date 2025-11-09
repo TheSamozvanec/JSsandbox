@@ -4,12 +4,14 @@ const settingsDefault={
     description:true, // описание снипета
     closeSnip:true, // закрыть после вывода
     autosave:true, // автосохранение кода в LS при RUN
+    tab:3, // количество пробелов кнопки tab
 };
 const settings={
     point:'index', // выделение снипета
     description:true, // описание снипета
     closeSnip:true, // закрыть после вывода
     autosave:true, // автосохранение кода в LS при RUN
+    tab:3, // количество пробелов кнопки tab
 };
 Object.seal(settings);
 
@@ -123,6 +125,7 @@ function setup(cmd,set){
    description: true вывод описания снипета в монитор при выборе
    closeSnip: true закрыть панель снипетов после выбора снипета 
    uatosave: true автосохранение текста в localStorage при нажатии RUN
+   tab: количество пробелов кнопки tab
 Пустой вызов setup() загрузит настройки хранилища или установит их по умолчанию (если их нет)
                        `)
             }
@@ -144,6 +147,7 @@ function setup(cmd,set){
     let file=document.getElementById('file');
     let curLf=document.getElementById('curLf');
     let curRt=document.getElementById('curRt');
+    let TAB=document.getElementById('tab');
     let btClsCode=document.getElementById('clsCode');
     let local = localStorage.getItem('sandboxJSv2.0');
     let keyboardActive=false;
@@ -385,6 +389,10 @@ parseint('10.3kg') => 10.3
 
         {key:'STR', fn:()=>{
             defineKeyboard(levelSTR);
+        }, bg:groupColor},
+
+        {key:'ARR', fn:()=>{
+            defineKeyboard(leveARRAY);
         }, bg:groupColor},
 
         {key:'HTML', fn:()=>{
@@ -748,7 +756,13 @@ reg.exec(str)
         {key:'Preci',fn:()=>{paste('.toPrecision(  )','\nФиксированное округление num.toPrecision(n)//n-знаков всего',false,14);}},   
              
     ];
-    //HTML____________________________________________________
+//Array________________________________________________
+    let leveARRAY = [
+
+        {key:'...',fn:()=>defineKeyboard(levelOne),bg:retColor},
+
+    ];
+//HTML____________________________________________________
     let levelHTML =[
         {key:'...',fn:()=>{
             defineKeyboard(levelOne);
@@ -1379,6 +1393,12 @@ _____________________________________________________
 //_______________________________________________________________________________________________________________________
     defineKeyboard(levelOne);
     function position(){cursor=code.selectionStart}
+    function keyTab(){
+        let v=' '.repeat(settings.tab);
+        let txt=code.value;
+        code.value=txt.substring(0,cursor)+v+txt.substring(cursor);
+        code.focus();
+    }
     function paste(v,d,opt, index){
         let txt=code.value;
         code.value=txt.substring(0,cursor)+v+txt.substring(cursor);
@@ -1427,6 +1447,7 @@ _____________________________________________________
             dvKeyboard.appendChild(bt);
         }
     }
+    TAB.addEventListener('click',keyTab);
     code.addEventListener('mouseup',()=>setTimeout(position,0));
     code.addEventListener('keydown',()=>setTimeout(position,0));
     curLf.addEventListener('click',()=>{
