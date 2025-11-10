@@ -24,10 +24,14 @@ body>div{
     width:95vw;
     height:45vh;
 }
+#tools #clsCode {background: #eb5f5fff}
+#tools #clsCode:hover {background: #d40404ff}
+#tools #cmd {background: #4a4de4ff}
+#tools #cmd:hover {background: #0719b8ff}
 #tools #run{background: green;}
 #tools #run.err{background: red;}
 #load{display: none;}
-#tools .active, #tools .active:hover{background: green;}
+#tools .active, #tools .active:hover, #tools #cmd.active{background: green;}
 #keyboard {
     background: rgb(6, 5, 107);
     position: absolute;

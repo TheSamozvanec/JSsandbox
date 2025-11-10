@@ -1396,8 +1396,11 @@ _____________________________________________________
     function keyTab(){
         let v=' '.repeat(settings.tab);
         let txt=code.value;
-        code.value=txt.substring(0,cursor)+v+txt.substring(cursor);
         code.focus();
+        code.value=txt.substring(0,cursor)+v+txt.substring(cursor);
+        code.selectionStart=cursor+settings.tab;
+        code.selectionEnd=cursor+settings.tab;
+        cursor=cursor+settings.tab;
     }
     function paste(v,d,opt, index){
         let txt=code.value;
