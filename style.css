@@ -34,7 +34,7 @@ body>div{
 #tools .active, #tools .active:hover, #tools #cmd.active{background: green;}
 #keyboard {
     background: rgb(6, 5, 107);
-    position: absolute;
+    position: fixed;
     top: 10vh;
     left: 80vw;
     width: 162px;
