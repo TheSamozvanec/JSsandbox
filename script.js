@@ -406,6 +406,10 @@ parseint('10.3kg') => 10.3
             defineKeyboard(levelGetDOM);
         }, bg:groupColor},
 
+        {key:'miscDOM', fn:()=>{
+            defineKeyboard(levelMiscDOM);
+        }, bg:groupColor},
+
         {key:'HTML', fn:()=>{
          if(!hasHTML()){paste(
 `
@@ -1321,7 +1325,6 @@ monitor.getElementByClassName('')
 `,false,32)}},
 
         {br:true},
-
         {br:true},
 
         {key:'m.qSel',fn:()=>{
@@ -1495,6 +1498,237 @@ let rows=table.rows
 `)}},
 
     ];
+//miscDOM___________________________________________________
+    let levelMiscDOM=[
+
+        {key:'...',fn:()=>{
+            defineKeyboard(levelOne)
+        },bg:retColor},
+
+        {key:'create',fn:()=>{
+            paste('document.createElement(\'\')',
+`
+Метод позволяет создать новый элемент, передав в параметре имя тега. 
+После создания с элементом можно работать как с обычным элементом, 
+а также его можно добавить на страницу методами 
+prepend, append, appendChild, insertBefore или insertAdjacentElement.
+Если записать результат работы createElement в переменную, 
+то в этой переменной будет такой элемент, 
+как будто он получекн через querySelector или getElementById. 
+Единственное отличие - элемент не будет размещен на странице. 
+Элементу можно менять innerHTML, атрибуты, 
+навешивать обработчики событий и в конце концов разместить на странице.
+`,false,24)}},
+
+        {key:'clone',fn:()=>{
+            paste('.cloneNode(true)',
+`
+Метод позволяет клонировать элемент и получить его точную копию. 
+Эту копию затем можно вставить на страницу с помощью методов 
+prepend, append, appendChild, insertBefore или insertAdjacentElement.
+В параметре метод получает true либо false. 
+Если передан true, то элемент клонируется полностью, 
+вместе со всем атрибутами и дочерними элементами, 
+а если false - только сам элемент (без дочерних элементов).
+Пример:
+let clone=elem.cloneNode(true)
+`,false,15)}},
+
+        {key:'prepend',fn:()=>{
+            paste('.prepend(  )',
+`
+Метод позволяет вставить в начало какого-либо элемента другой элемент. 
+Параметром метод принимает элемент, как правило созданный через createElement, 
+либо строку. Можно добавить сразу несколько элементов или строк, 
+перечислив их через запятую.
+`,false,10)}},
+
+        {key:'append',fn:()=>{
+            paste('.append(  )',
+`
+Метод позволяет вставить в конец какого-либо элемента другой элемент. 
+Параметром метод принимает элемент, как правило созданный через createElement, 
+либо строку. Можно добавить сразу несколько элементов или строк, 
+перечислив их через запятую.
+`,false,10)}},
+
+        {key:'Before',fn:()=>{
+            paste('.insertBefore(  )',
+`
+Метод позволяет вставить элемент перед другим элементом. 
+Чаще всего используется после создания элемента с помощью createElement. 
+Метод применяется к родителю того элемента, 
+перед которым произойдет вставка.
+У метода 2 параметра
+родитель.insertBefore(вставить элемент, перед кем вставить элемент);
+`,false,15)}},
+
+        {key:'insAdjE',fn:()=>{
+            paste('.insertAdjacentElement(\'beforeBegin\',elem)',
+`
+Метод позволяет вставить элемент в любое место страницы. 
+Чаще всего используется после создания элемента с помощью createElement. 
+Код вставляется относительно опорного элемента. М
+ожно сделать вставку перед опорным элементом (способ вставки beforeBegin), 
+после него (способ вставки afterEnd), 
+а также в начало (способ вставки afterBegin) 
+или в конец (способ вставки beforeEnd) опорного элемента.
+опорный элемент.insertAdjacentElement(способ вставки, елемент);
+Есть похожие методы: insertAdjacentHTML для строки html кода;
+insertAdjacentText для строки текста
+`,false,35)}},
+
+        {key:'remove',fn:()=>{
+            paste('.remove()',
+`
+Метод позволяет удалить элемент. 
+Применяется к тому элементу, который нужно удалить.
+`)}},
+
+        {br:true},
+        {br:true},
+
+        {key:'text',fn:()=>{
+            paste('.textContent',
+`
+Свойство позволяет получить и изменить текст элемента. 
+Изменение данного свойства может "сломать" структуру html
+элемента, если она есть. Можно пронаблюдать за работой свойства, 
+если сначала запустить в данном приложении код
+printObj({a:'asd'})
+Затем добавить в код строку print('text') (и снова запустить)
+В мониторе сломается структура html, созданная функцией printObj()  
+`)}},
+
+        {key:'iHT',fn:()=>{
+            paste('.innerHTML',
+`
+Свойство  позволяет получить и изменить 
+HTML код элемента (внутри элемента). 
+`)}},
+
+        {key:'oHT',fn:()=>{
+            paste('.outerHTML',
+`
+Свойство позволяет получить и изменить 
+HTML код элемента вместе с его тэгом.
+`)}},
+
+        {key:'tag',fn:()=>{
+            paste('.tagName',
+`
+Свойство содержит имя тега в верхнем регистре (большими буквами).
+`)}},
+
+        {key:'attr',fn:()=>{
+            paste('',
+`
+методы работы с атрибутами элементов 
+Получение, установка, удаление, проверка.
+`,true);
+            defineKeyboard(levelAttr);
+        }, bg:subgropColor},
+
+        {key:'dataset',fn:()=>{
+            paste('.dataset',
+`
+В языке HTML разрешено добавлять свои атрибуты тегам, 
+при этом они должны начинаться с data-, 
+а затем должно идти любое название атрибута. 
+Для обращения к таким атрибутам через JavaScript 
+используется специальное свойство dataset.
+В dataset можно передавать данные объектами:
+monitor.innerHTML=\`
+<div class='dv1'>div</div>
+\`
+let div=monitor.querySelector('.dv1');
+let obj={a:10,b:12}
+Object.assign(div.dataset, obj)
+print(div.outerHTML)
+В результате выполнения этого скрипта вы увидите как 
+в html коде элемента появятся атрибуты data-a и data-b
+`)}},
+
+        {key:'class',fn:()=>{
+            paste('.classList',
+`
+Свойство содержит псевдомассив CSS классов элемента, а
+также позволяет добавлять и удалять классы элемента, 
+проверять наличие определенного класса среди классов элемента.
+`,true);
+            defineKeyboard(leveClassList);
+        }, bg:subgropColor},
+
+        {key:'getComputedStyle',fn:()=>{
+            paste('getComputedStyle(  )',
+`
+Функция getComputedStyle позволяет получить значение 
+любого CSS свойства элемента, даже из CSS файла.
+let stl = getComputedStyle(elem)
+print(stl.width)
+`,false,19)}},
+
+
+
+    ];
+    
+//attr____________________________________________________
+    let levelAttr = [
+
+        {key:'...',fn:()=>{
+            defineKeyboard(levelMiscDOM);
+        }, bg:retColor},
+
+        {key:'get',fn:()=>{
+            paste('.getAttribute(\'\')','\nМетод считывает значение заданного атрибута у тега.',false,15);
+            defineKeyboard(levelMiscDOM);
+        }, bg:retColor},
+
+        {key:'set',fn:()=>{
+            paste('.setAttribute(\'\')','\nМетод устанавливает значение заданного атрибута у тега.',false,15);
+            defineKeyboard(levelMiscDOM);
+        }, bg:retColor},
+
+        {key:'rem',fn:()=>{
+            paste('.removeAttribute(\'\')','\nМетод удаляет атрибут тега.',false,18);
+            defineKeyboard(levelMiscDOM);
+        }, bg:retColor},
+
+         {key:'has',fn:()=>{
+            paste('.hasAttribute(\'\')','\nМетод проверяет наличие атрибута true/false',false,15);
+            defineKeyboard(levelMiscDOM);
+        }, bg:retColor},
+
+    ];
+//classList_________________________________________________
+    let leveClassList = [
+
+        {key:'...',fn:()=>{
+            defineKeyboard(levelMiscDOM);
+        }, bg:retColor},
+
+        {key:'add',fn:()=>{
+            paste('.add(\'\')','\nДобавить класс элементу\nНазвание класса без точки!',false,6);
+            defineKeyboard(levelMiscDOM);
+        },bg:retColor},
+
+        {key:'remove',fn:()=>{
+            paste('.remove(\'\')','\nУдалить класс элемента\nНазвание класса без точки!',false,9);
+            defineKeyboard(levelMiscDOM);
+        },bg:retColor},
+
+        {key:'contains',fn:()=>{
+            paste('.contains(\'\')','\nПроверить наличие класса элемента\nНазвание класса без точки!',false,11);
+            defineKeyboard(levelMiscDOM);
+        },bg:retColor},
+
+        {key:'toggle',fn:()=>{
+            paste('.toggle(\'\')','\nПереключатель(убрать/поставить)\nНазвание класса без точки!',false,9);
+            defineKeyboard(levelMiscDOM);
+        },bg:retColor},
+
+    ];
+
 //HTML____________________________________________________
     let levelHTML =[
         {key:'...',fn:()=>{
@@ -2066,17 +2300,33 @@ _____________________________________________________
 //Array____________________________________________
     let levelArray = [
        {key:'isArray',fn:()=>{
-            paste('isArray(  )');
+            paste('isArray(  )',
+`
+Метод проверяет является ли данный объект массивом. 
+В случае, если это так, то возвращается true, 
+в противном случае - false.
+`,false,9);
             defineKeyboard(levelOne);
         }, bg:retColor},
 
         {key:'of',fn:()=>{
-            paste('of(  )');
+            paste('of(  )',
+`
+Метод возвращает новый массив из указанных в параметре значений.
+`,false,4);
             defineKeyboard(levelOne);
         }, bg:retColor},
 
         {key:'from',fn:()=>{
-            paste('from(  )');
+            paste('from(  )',
+`
+Метод возвращает новый массив из массивоподобного 
+или итерируемого объекта (псевдомассива). 
+Первым параметром метод принимает объект, 
+из которого нужно сделать массив, 
+вторым необязательным - функцию, 
+которую нужно применить к элементам объекта.
+`,false,6);
             defineKeyboard(levelOne);
         }, bg:retColor},
     ]
