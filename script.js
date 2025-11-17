@@ -291,19 +291,19 @@ false, 60)}, bg:syntColor},
         
 //        {br:true},
 
-        {key:'for', fn:()=>{paste('for(let i=0; i<10; i++){  }\n',
+        {key:'for', fn:()=>{paste('for(let i=0; i<10; i++){  }',
 `
 Стандартный цикл i - счетчик, i<10 - условие лиммита,
 i++ шаг прирощения можно i+=0.5 или другое
 `,false, 24)}},
 
-        {key:'f of', fn:()=>{paste('for(let elem of array){  }\n',
+        {key:'f of', fn:()=>{paste('for(let elem of array){  }',
 `
 Цикл перебора массива. Цикл переберает весь 1 уровень массив array,
 В каждой итерации elem получает значение очередного элемента массива 
 `,false,23)}},
 
-        {key:'f in', fn:()=>{paste('for(let key in obj){  }\n',
+        {key:'f in', fn:()=>{paste('for(let key in obj){  }',
 `
 Цикл перебора объектаю Цикл переберает весь 1 уровень объекта obj.
 В каждой итерации key имеет значение очередного ключа (свойства) объекта
@@ -332,12 +332,12 @@ i++ шаг прирощения можно i+=0.5 или другое
 в случае не выполнения условия. 
 `,false,4)}, bg:syntColor},
 
-        {key:'swt', fn:()=>{paste('\nswitch (int){\n  case 1:\n\n  break;\n  case 2:\n\n  break; \n  case 3:\n\n  break; \n  default:\n\n}',
+        {key:'swt', fn:()=>{paste('switch (int){\n  case 1:\n\n  break;\n  case 2:\n\n  break; \n  case 3:\n\n  break; \n  default:\n\n}',
 `
 Многовариантное условие. В скобках указывается переменная
 Каждый кейс содержит значение переменной и блок, который будет выполнен при указанном значении
 Блок default будет выполнен, если ниодно значение не совпало
-`,false,12)}, bg:syntColor},
+`,false,11)}, bg:syntColor},
 
         {key:'and', fn:()=>{paste('&&')}},
 
@@ -347,21 +347,21 @@ i++ шаг прирощения можно i+=0.5 или другое
 
         {key:'num', fn:()=>{paste('Number(  )','\nпреобразование строки в число \'123\'=>123',false,8)}},
 
-        {key:'prI', fn:()=>{paste('parseInt( \'str\' )', 
+        {key:'prI', fn:()=>{paste('parseInt(\'str\')', 
 `
 Получение целого числа из строки числа с единицами измерения
 parseint('10px') => 10
-`,false,11)}},
+`,false,13)}},
 
-        {key:'prF', fn:()=>{paste('parseFloat( \'str\' )',
+        {key:'prF', fn:()=>{paste('parseFloat(\'str\')',
 `
 Получение дробного числа из строки числа с единицами измерения
 parseint('10.3kg') => 10.3
-`,false,13)}},
+`,false,15)}},
 
-        {key:'str', fn:()=>{paste('String(  )','\n В строку')}},
+        {key:'str', fn:()=>{paste('String(  )','\n перевести значение в строку',false,8)}},
 
-        {key:'boo', fn:()=>{paste('Boolean(  )')}},
+        {key:'boo', fn:()=>{paste('Boolean(  )','\n перевести значение в булеву единицу (true/false)',false,9)}},
 
 //        {br:true}, 
 
@@ -377,7 +377,7 @@ parseint('10.3kg') => 10.3
 
         {key:'del', fn:()=>{paste('delete','удаление свойства объекта или элемента массива\n delete arr[1]')}},
 
-        {key:'tr-c', fn:()=>{paste('try {\n\n}catch(err){\n\n}')},bg:syntColor},
+        {key:'tr-c', fn:()=>{paste('try {\n\n}catch(err){\n\n}finally{  }')},bg:syntColor},
 
         {key:'trw', fn:()=>{paste('throw new Error(\'  \')')}},
 
@@ -400,6 +400,10 @@ parseint('10.3kg') => 10.3
 
         {key:'TIME', fn:()=>{
             defineKeyboard(levelTIME);
+        }, bg:groupColor},
+
+        {key:'getDOM', fn:()=>{
+            defineKeyboard(levelGetDOM);
         }, bg:groupColor},
 
         {key:'HTML', fn:()=>{
@@ -760,7 +764,15 @@ reg.exec(str)
 
         {key:'Fix',fn:()=>{paste('.toFixed(  )','\nФиксированное округление num.toFixed(n)// n-знаков после \'.\'',false,10)}},
 
-        {key:'Preci',fn:()=>{paste('.toPrecision(  )','\nФиксированное округление num.toPrecision(n)//n-знаков всего',false,14)}},   
+        {key:'Preci',fn:()=>{paste('.toPrecision(  )','\nФиксированное округление num.toPrecision(n)//n-знаков всего',false,14)}},
+        {key:'toStr',fn:()=>{paste('.toString()',
+`
+Метод в большенстве случаев равносилен функции String(), но есть некоторые отличия.
+В некоторых случаях именно он применим (в nodeJS приводит массив буфера stdIn в строку)
+Также есть полезная опция, vожно передавать аргумент в метод, 
+определяя систему счисления для числового значения:
+(10).toString(2)=>'1010'
+`)}}   
              
     ];
 //ARR________________________________________________
@@ -1234,6 +1246,253 @@ let id=setInterval (()=>{})
             paste('Milliseconds(  )','\nМиллисекунды (0-999)',false,14);
             defineKeyboard(levelTIME);
         }, bg:retColor},
+
+    ];
+//getDOM___________________________________________________
+    let levelGetDOM=[
+
+         {key:'...',fn:()=>{
+            defineKeyboard(levelOne);
+        }, bg:retColor},
+
+        {key:'d.qSel',fn:()=>{
+            paste('document.querySelector(\'\')',
+`
+Получение элемента по селектору let div=document.querySelector('div')
+Селектор необходимо вводить точно также, как и в css файле: теги пишутся без знаков - 'input',
+id элементов после знака # - '#user-login', классы с точкой - '.warn-massage'
+querySelector применим не только ко всему документу, но и к конкретному элементу.
+let authForm = document.querySelector('.authForm')
+let name=authForm.querySelector('.name')
+Если селектор будет соответствовать группе элементов, метод вернет первый элемент!
+В данном приложении для удобства пользователей есть объект monitor- 
+элемент <div>, расположенный в нижней части экрана.
+Чтобы не сломать структуру страницы рекомендую использовать синтаксис
+monitor.querySelector('')
+`,false,24)}},
+
+        {key:'d.qSAll',fn:()=>{
+            paste('document.querySelectorAll(\'\')',
+`
+Получение динамического псевдомассива элементов по селектору let div=document.querySelectorAll('div')
+Селектор необходимо вводить точно также, как и в css файле: теги пишутся без знаков - 'input',
+id элементов после знака # - '#user-login', классы с точкой - '.warn-massage'
+querySelector применим не только ко всему документу, но и к конкретному элементу.
+let authForm = document.querySelectorAll('.authForm')
+let data=authForm.querySelectorAll('input')
+console.log(data[0].value) или print(data[0].value) для данного приложения 
+В данном приложении для удобства пользователей есть объект monitor- 
+элемент <div>, расположенный в нижней части экрана.
+Чтобы не сломать структуру страницы рекомендую использовать синтаксис
+monitor.querySelectorAll('')
+`,false,27)}},
+
+        {key:'d.EById',fn:()=>{
+            paste('document.getElementById(\'\')',
+`
+Получение элемента по id: let div=document.getElementById('id10')
+ID элемента вводится без знака # 
+В данном приложении для удобства пользователей есть объект monitor- 
+элемент <div>, расположенный в нижней части экрана.
+Чтобы не сломать структуру страницы рекомендую использовать синтаксис
+monitor.getElementById('')
+`,false,25)}},
+
+        {key:'d.EByTN',fn:()=>{
+            paste('document.getElementByTagName(\'\')',
+`
+Получение псевдомассива элементов по имени тэга
+ let div=document.getElementByTagName('div')
+В данном приложении для удобства пользователей есть объект monitor- 
+элемент <div>, расположенный в нижней части экрана.
+Чтобы не сломать структуру страницы рекомендую использовать синтаксис
+monitor.getElementByTagName('')
+`,false,30)}},
+
+         {key:'d.EByCN',fn:()=>{
+            paste('document.getElementByClassName(\'\')',
+`
+Получение псевдомассива элементов класса html (атрибут class='')
+let div=document.getElementByClassName('div')
+В данном приложении для удобства пользователей есть объект monitor- 
+элемент <div>, расположенный в нижней части экрана.
+Чтобы не сломать структуру страницы рекомендую использовать синтаксис
+monitor.getElementByClassName('')
+`,false,32)}},
+
+        {br:true},
+
+        {br:true},
+
+        {key:'m.qSel',fn:()=>{
+            paste('monitor.querySelector(\'\')',
+`
+Получение элемента по селектору let div=monitor.querySelector('div')
+Селектор необходимо вводить точно также, как и в css файле: теги пишутся без знаков - 'input',
+id элементов после знака # - '#user-login', классы с точкой - '.warn-massage'
+querySelector применим не только ко всему документу, но и к конкретному элементу.
+let authForm = monitor.querySelector('.authForm')
+let name=authForm.querySelector('.name')
+Если селектор будет соответствовать группе элементов, метод вернет первый элемент!
+monitor.querySelector('') применим после создания DOM непосредственно в элементе
+monitor путем написаня html кода в monitor.innerHTML или создания элементов
+методами JS
+`,false,23);
+        }},
+        {key:'m.qSAll',fn:()=>{
+            paste('monitor.querySelectorAll(\'\')',
+`
+Получение массива элементов по селектору let div=monitor.querySelectorAll('div')
+Селектор необходимо вводить точно также, как и в css файле: теги пишутся без знаков - 'input',
+id элементов после знака # - '#user-login', классы с точкой - '.warn-massage'
+querySelector применим не только ко всему документу, но и к конкретному элементу.
+let authForm = monitor.querySelectorAll('.authForm')
+let data=authForm.querySelectorAll('input')
+console.log(data[0].value) или print(data[0].value) для данного приложения 
+monitor.querySelectorAll('') применим после создания DOM непосредственно в элементе
+monitor путем написаня html кода в monitor.innerHTML или создания элементов
+методами JS
+`,false,26)}},
+
+        {key:'m.EById',fn:()=>{
+            paste('monitor.getElementById(\'\')',
+`
+Получение элемента по id: let div=monitor.getElementById('id10')
+ID элемента вводится без знака # 
+monitor.getElementById('') применим после создания DOM непосредственно в элементе
+monitor путем написаня html кода в monitor.innerHTML или создания элементов
+методами JS
+`,false,24)}},
+
+        {key:'m.EByTN',fn:()=>{
+            paste('monitor.getElementByTagName(\'\')',
+`
+Получение псевдомассива элементов по имени тэга
+ let div=monitor.getElementByTagName('div')
+monitor.getElementByTagName('') применим после создания DOM непосредственно в элементе
+monitor путем написаня html кода в monitor.innerHTML или создания элементов
+методами JS
+`,false,29)}},
+
+        {key:'m.EByCN',fn:()=>{
+            paste('monitor.getElementByClassName(\'\')',
+`
+Получение псевдомассива элементов класса html (атрибут class='')
+let div=monitor.getElementByClassName('div')
+monitor.getElementByClassName('') применим после создания DOM непосредственно в элементе
+monitor путем написаня html кода в monitor.innerHTML или создания элементов
+методами JS
+`,false,31)}},
+
+        {key:'closest',fn:()=>{
+            paste('.closest(\'\')',
+`
+Метод ищет ближайший родительский элемент, 
+подходящий под указанный CSS селектор, 
+при этом сам элемент тоже включается в поиск.
+elem.closest('p.message') 
+`,false,10)}},
+
+        {key:'matches',fn:()=>{
+            paste('.matches(\'\')',
+`
+Метод позволяет проверить, 
+удовлетворяет ли элемент указанному CSS селектору.
+elem.matches('p.message')
+`,false,10)}},
+
+        {key:'contains',fn:()=>{
+            paste('.contains(  )',
+`
+Метод позволяет проверить, 
+содержит ли один элемент внутри себя другой. 
+Параметром метода передается элемент (в виде переменной со ссылкой), 
+который будет проверяться на то, что он находится внутри элемента, 
+к которому применился метод.
+`,false,11)}},
+
+        {key:'child',fn:()=>{
+            paste('.children',
+`
+Свойство хранит в себе псевдомассив дочерних элементов. 
+Дочерними элементами считаются все теги, 
+которые непосредственно расположены внутри блока.
+let elems=form.children
+`)}},
+
+        {key:'fChild',fn:()=>{
+            paste('.firstElementChild',
+`
+Свойство содержит первый дочерний элемент. 
+Дочерними элементами считаются все теги, 
+которые непосредственно расположены внутри блока. 
+Если у элемента нет дочерних элементов - возвращается null.
+let elem=form.firstElementChild
+`)}},
+
+        {key:'lChild',fn:()=>{
+            paste('.lastElementChild',
+`
+Свойство содержит последний дочерний элемент. 
+Дочерними элементами считаются все теги, 
+которые непосредственно расположены внутри блока. 
+Если у элемента нет дочерних элементов - возвращается null.
+let elem=form.lastElementChild
+`)}},
+
+        {key:'prevElem',fn:()=>{
+            paste('.previousElementSibling',
+`
+Свойство содержит предыдущий элемент, 
+находящийся в этом же родителе. 
+Если такого элемента нет - возвращается null.
+let elem=inp.previousElementSibling
+`)}},
+
+        {key:'nextElem',fn:()=>{
+            paste('.nextElementSibling',
+`
+Свойство содержит следующий элемент, 
+находящийся в этом же родителе. 
+Если такого элемента нет - возвращается null.
+let elem=inp.nextElementSibling
+`)}},
+
+        {key:'parentElement',fn:()=>{
+            paste('.parentElement',
+`
+Свойство содержит родительский элемент.
+let elem=inp.parentElement
+`)}}, 
+
+        {br:true},
+
+        {key:'rows',fn:()=>{
+            paste('.rows',
+`
+Свойство хранит коллекцию строк tr. 
+Может применяться как к таблице, 
+так и к ее секциям tHead, tBodies, tFoot.
+let rows=table.rows
+`)}},
+
+        {key:'tHead',fn:()=>{
+            paste('.tHead',
+`
+Свойство хранит ссылку на thead таблицы.
+`)}},
+
+        {key:'tFoot',fn:()=>{
+            paste('.tFoot',
+`
+Свойство хранит ссылку на tfoot таблицы.
+`)}},
+
+        {key:'tBodies',fn:()=>{
+            paste('.tBodies',
+`
+Свойство хранит массив всех tbody таблицы (их может быть несколько).
+`)}},
 
     ];
 //HTML____________________________________________________
