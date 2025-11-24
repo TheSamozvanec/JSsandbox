@@ -23,6 +23,7 @@ body>div{
     margin: 5px auto;
     width:95vw;
     height:45vh;
+    resize:horizontal;
 }
 #tools #clsCode {background: #eb5f5fff}
 #tools #clsCode:hover {background: #d40404ff}
