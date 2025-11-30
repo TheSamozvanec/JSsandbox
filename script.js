@@ -11,7 +11,7 @@ const settings={
     description:true, // описание снипета
     closeSnip:true, // закрыть после вывода
     autosave:true, // автосохранение кода в LS при RUN
-    tab:3, // количество пробелов кнопки tab
+    tab:3, // количество пробелов кнопки tab  
 };
 Object.seal(settings);
 
@@ -37,7 +37,7 @@ const printObj = function(...rest) {
     }
 }
 
-function run (){
+function run (){ 
     if(settings.autosave){
         localStorage.setItem('sandboxJSv2.0',document.querySelector('#code').value);
     }
@@ -149,14 +149,18 @@ function setup(cmd,set){
     let curRt=document.getElementById('curRt');
     let TAB=document.getElementById('tab');
     let btClsCode=document.getElementById('clsCode');
+    let hidC=document.getElementById('hidd-c');
+    let monitorMini=document.getElementById('monitor-mini');
+    let help = document.getElementById('help');
     let local = localStorage.getItem('sandboxJSv2.0');
+    let isHelp = false;
     let keyboardActive=false;
     let specColor = '#805499ff';
     let syntColor = 'green';
     let groupColor = 'yellow';
     let subgropColor = 'blue';
     let retColor = '#ff8080';
-    
+
     file.value='NewFile-'+String((new Date()).getTime())+'.js';
     if (local) code.value=local;
 
@@ -239,6 +243,17 @@ function setup(cmd,set){
             dvKeyboard.hidden=true;
         };  
     }
+    function toggleMonitor(){
+        code.classList.toggle('mini');
+        monitor.classList.toggle('mini');
+        monitorMini.classList.toggle('sel');
+    }
+    function toggleCode(){
+        code.classList.toggle('hidd');
+        hidC.classList.toggle('sel');
+    }
+    hidC.addEventListener('click',toggleCode);
+    monitorMini.addEventListener('click',toggleMonitor);
     btSave.addEventListener('click', save);
     btLoad.addEventListener('change', load);
     btClsCode.addEventListener('click',clsCode);
@@ -315,11 +330,25 @@ i++ шаг прирощения можно i+=0.5 или другое
 `,
             false,14)}},
 
-        {key:'bre', fn:()=>{paste('break;')}},
+        {key:'bre', fn:()=>{paste('break;',
+`
+Используется в циклах для прерывания цикла.
+`)}},
 
-        {key:'ctn', fn:()=>{paste('continue;')}},
+        {key:'ctn', fn:()=>{paste('continue;',
+`
+Используется в цикле для "досрочного" перехода
+к следующей итерации. Есть также синтаксис 
+опреатора с меткой (редко используется)
+`)}},
 
-         {key:'new', fn:()=>{paste('new')}},
+         {key:'new', fn:()=>{paste('new',
+`
+Вызов конструктора для создания объекта кдасса.
+Это может быть встроенный клас let date = new Date()
+Также это может быть объект класса, созданный
+с помощью оператора class 
+`)}},
 
         {br:true},
 
@@ -2600,6 +2629,20 @@ import {func1, func2} from './module'
             defineKeyboard(levelEVENT);
         }, bg:retColor},
 
+        {key:'deviceorientation',fn:()=>{
+            paste('deviceorientation',
+`
+Событие относится к девайсам, оснащенным 
+героскопом (классический пример - смартфон).
+Опрос события необходимо применять к объекту 
+window.
+Объект события (ev) имеет 3 свойства: 
+alpha, beta и gamma. Каждое свойство соответствует
+своей плоскости (желательно протестировать).
+`)
+            defineKeyboard(levelEVENT);
+        }, bg:retColor},
+
     ];
 //attr____________________________________________________
     let levelAttr = [
@@ -3182,7 +3225,7 @@ _____________________________________________________
 Атрибуты объекта descriptor:
 - value: Значение свойства.
 - writable: Определяет, разрешено ли перезапись значения свойства. По умолчанию false.
-- enumerable: Показывает, отображается ли свойство при итерации (например, цикле for...in)
+- enumerable: Показывает, отображается ли свойство при итерации (например, цикле for...of)
   или выводится ли оно методом Object.keys. По умолчанию false.
 - configurable: Может ли само свойство быть удалено или переопределено. По умолчанию false.
 С помощью данного метода также возможно задание геттера и сеттера свойства (гугли если нужно!!!)
@@ -3315,38 +3358,40 @@ _____________________________________________________
         cursor=cursor+settings.tab;
     }
     function paste(v,d,opt, index){
-        let txt=code.value;
-        code.value=txt.substring(0,cursor)+v+txt.substring(cursor);
-        code.focus();
-        try{
-            switch (settings.point){
-                case 'select':
-                    code.selectionStart = !opt? cursor:cursor+v.length;
-                    code.selectionEnd = cursor+v.length;
-                    cursor=cursor+v.length;
-                break;
-                case 'start':
-                    code.selectionStart = !opt? cursor:cursor+v.length;
-                    code.selectionEnd = !opt? cursor:cursor+v.length;
-                    cursor= !opt? cursor:cursor+v.length;
-                break;
-                case 'end':
-                    code.selectionStart = cursor+v.length;
-                    code.selectionEnd = cursor+v.length;
-                    cursor= cursor+v.length;
-                break;
-                case 'index':
-                    code.selectionStart = index? cursor+index:cursor+v.length;
-                    code.selectionEnd = index? cursor+index:cursor+v.length;
-                    cursor = index? cursor+index:cursor+v.length;
-                break;
-                default:
-                    throw new TypeError('Invalid settings!!! Invalid \'point\' property value, use: \'select\', \'start\', \'end\', or \'index\'')
-            }
-        } catch (err) {cls(); print(err)}
-        
-        if (settings.description && d)print(d)
-        if (settings.closeSnip && !opt) keyboard();
+        if (!isHelp){
+            let txt=code.value;
+            code.value=txt.substring(0,cursor)+v+txt.substring(cursor);
+            code.focus();
+            try{
+                switch (settings.point){
+                    case 'select':
+                        code.selectionStart = !opt? cursor:cursor+v.length;
+                        code.selectionEnd = cursor+v.length;
+                        cursor=cursor+v.length;
+                    break;
+                    case 'start':
+                        code.selectionStart = !opt? cursor:cursor+v.length;
+                        code.selectionEnd = !opt? cursor:cursor+v.length;
+                        cursor= !opt? cursor:cursor+v.length;
+                    break;
+                    case 'end':
+                        code.selectionStart = cursor+v.length;
+                        code.selectionEnd = cursor+v.length;
+                        cursor= cursor+v.length;
+                    break;
+                    case 'index':
+                        code.selectionStart = index? cursor+index:cursor+v.length;
+                        code.selectionEnd = index? cursor+index:cursor+v.length;
+                        cursor = index? cursor+index:cursor+v.length;
+                    break;
+                    default:
+                        throw new TypeError('Invalid settings!!! Invalid \'point\' property value, use: \'select\', \'start\', \'end\', or \'index\'')
+                }
+            } catch (err) {cls(); print(err)}
+        }
+         
+        if ((settings.description && d) || isHelp )print(d)
+        if (settings.closeSnip && !opt && !isHelp) keyboard();
     }
     function defineKeyboard(level){
         dvKeyboard.innerHTML='';
@@ -3377,6 +3422,18 @@ _____________________________________________________
         code.selectionStart=cursor;
         code.selectionEnd=cursor;
     });
+    help.addEventListener('click',()=>{
+        help.classList.toggle('active');
+        isHelp=!isHelp;
+        if(isHelp){
+            code.classList.add('hidd');
+            hidC.classList.add('sel');
+            cls();
+        } else {
+            code.classList.remove('hidd');
+            hidC.classList.remove('sel');            
+        }
+    })
     function hasCSS(){
         let css=code.value.indexOf('style.innerHTML=');
         if (css!==-1){ 

@@ -4,7 +4,17 @@ body>div{
     width: 95vw;
     min-height:5vh;
 }
-#file{width:45vw}
+#windows{
+    margin: 1px auto;
+    padding: 0px;
+    min-height: 0.5vh;
+}
+#windows>button{
+    padding: 0px;
+    width:46vw;
+    font-size:0.8em;
+}
+#file{width:50%}
 #monitor{
     min-height:45vh;
     border: 1px solid red;
@@ -13,7 +23,7 @@ body>div{
 #tools>button, label{
     background: rgba(185, 185, 185, 1);
     border: 1px solid black;
-    margin: 5px;
+    margin: 3px;
     padding: 3px;
 }
 #tools>button:hover, #lab:hover{background: rgba(220, 221, 221, 1);}
@@ -24,6 +34,15 @@ body>div{
     width:95vw;
     height:45vh;
     resize:horizontal;
+}
+#code.mini {
+    height:70vh;
+}
+#monitor.mini {
+    min-height:20vh;
+}
+#code.hidd {
+    display:none;
 }
 #tools #clsCode {background: #eb5f5fff}
 #tools #clsCode:hover {background: #d40404ff}
@@ -55,3 +74,5 @@ body>div{
     width: 46vw;
   }
 }
+#hidd-c, #monitor-mini{background:green}
+#hidd-c.sel, #monitor-mini.sel{background:red}
