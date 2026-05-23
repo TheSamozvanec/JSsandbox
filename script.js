@@ -845,14 +845,14 @@ reg.exec(str)
 `        
 ,false,6)}},
 
-        {key:'test',fn:()=>{paste('.test(//)',
+        {key:'test',fn:()=>{paste('//.test()',
 `
-.test(//)
+//.test()
 Метод проверяет, есть ли в строке хотя бы одно совпадение 
 с регулярным выражением. 
 Если есть - возвращается true, а если нет - false.
 `        
-,false,7)}},
+,false,1)}},
 
         {key:'sear',fn:()=>{paste('.search(//)',
 `
