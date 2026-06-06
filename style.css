@@ -4,6 +4,16 @@ body>div{
     width: 95vw;
     min-height:5vh;
 }
+#tools{
+    position: fixed;
+    left: 50%;
+    top: 0;
+    transform: translate(-50%);
+    padding: 3px;
+    background: rgb(2, 18, 161);
+    border: 1px solid black;
+    box-shadow: 1px 1px 2px 2px rgb(131, 131, 134);
+}
 #windows{
     margin: 1px auto;
     padding: 0px;
@@ -30,7 +40,8 @@ body>div{
 #tools>button:active, #lab:active{background: rgba(95, 95, 97, 1);}
 #code{
     display: block;
-    margin: 5px auto;
+    margin: 3px auto;
+    margin-top: 5rem;
     width:95vw;
     height:45vh;
     resize:horizontal;
@@ -58,7 +69,7 @@ body>div{
     top: 10vh;
     left: 80vw;
     width: 162px;
-    min_height: 20vh;
+    min-height: 20vh;
     border: 1px solid black;
 }
 #keyboard button {

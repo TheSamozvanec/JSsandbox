@@ -2546,7 +2546,6 @@ finally{}
 
         {key:'FETCH', fn:()=>{paste(
 `fetch('https://',{
-headers:{
  mode:'cors',
  method:'post',
  headers:{
@@ -2554,7 +2553,6 @@ headers:{
   'Authorization':'Bearer eyJhbGciOiJI....',
   },
  body:JSON.stringify(obj) 
- }
 })
 `,
 `
