@@ -20,11 +20,12 @@ const monitor=document.getElementById('monitor');
 const style=document.querySelector('style');
 
 const print = function (...rest){
-    let res='';
+    let res=`<span style="white-space:pre-wrap">`;
     for (let str of rest){
         res+=str+'\n';
     }
-    monitor.textContent+=res
+    res+=`</span><br>`
+    monitor.innerHTML+=res
 }
 const cls = function () {monitor.textContent=''}
 

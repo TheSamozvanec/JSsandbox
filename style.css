@@ -28,7 +28,7 @@ body>div{
 #monitor{
     min-height:45vh;
     border: 1px solid red;
-    white-space: pre-wrap;
+    white-space: normal;/*pre-wrap*/
 }
 #tools>button, label{
     background: rgba(185, 185, 185, 1);
@@ -53,7 +53,7 @@ body>div{
     min-height:20vh;
 }
 #code.hidd {
-    display:none;
+    height: 0;
 }
 #tools #clsCode {background: #eb5f5fff}
 #tools #clsCode:hover {background: #d40404ff}
