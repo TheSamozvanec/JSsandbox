@@ -20,7 +20,7 @@ const monitor=document.getElementById('monitor');
 const style=document.querySelector('style');
 
 const print = function (...rest){
-    let res=`<span style="white-space:pre-wrap">`;
+    let res=`<span style="white-space:pre-wrap; background:#ddd">`;
     for (let str of rest){
         res+=str+'\n';
     }
@@ -29,6 +29,65 @@ const print = function (...rest){
 }
 const cls = function () {monitor.textContent=''}
 
+const printR = function(rest){
+    if (typeof rest !=='object') return print(rest)
+    let result='<span style="white-space:pre-wrap; background:#efa">';
+    let level=0;
+    let tab=5
+    recurs(rest);
+    result = result.slice(0,-2) + result.slice(-1)
+    result+=`</span><br>`
+    monitor.innerHTML+=result
+    return
+    function recurs(obj){
+        if (Array.isArray(obj)) {
+            result+=' '.repeat(level*tab)+'[\n';
+            level++;
+            for (let elem of obj){
+                if (typeof elem==='object') {
+                    recurs(elem);
+                    continue;
+                } 
+                result+=' '.repeat(level*tab)
+                render(elem)
+            }
+            level--;
+            result = result.slice(0,-2) + result.slice(-1)
+            result+=' '.repeat(level*tab)+'],\n';
+        } else {
+            result+=' '.repeat(level*tab)+'{\n';
+            level++;
+            for (let key in obj){
+                if (typeof obj[key]==='object') {
+                    recurs(obj[key]);
+                    continue;
+                }
+                result+=' '.repeat(level*tab)
+                result+=key+':' 
+                render(obj[key])
+            }
+            level--;
+            result = result.slice(0,-2) + result.slice(-1)
+            result+=' '.repeat(level*tab)+'},\n';
+        }
+    }
+    function render(elem){
+        switch (typeof elem){
+            case 'string':
+                result+=`<span style='color:red'>'${elem}'</span>,\n`;
+                break;
+            case 'number':
+                result+=`<span style='color:blue'>${elem}</span>,\n`;
+                break;
+            case 'boolean':
+                result+=`<span style='color:green'>${elem}</span>,\n`;
+                break;
+            default:
+                result+=`<span>${elem}</span>,\n`;
+        }
+    }
+    
+}
 const printObj = function(...rest) {
     for (let obj of rest) {
         for(let i in obj){  
@@ -2547,12 +2606,12 @@ finally{}
 
         {key:'FETCH', fn:()=>{paste(
 `fetch('https://',{
- mode:'cors',
- method:'post',
+ method:'POST',
  headers:{
   'Content-Type':'application/json',
   'Authorization':'Bearer eyJhbGciOiJI....',
   },
+ credentials: 'include',
  body:JSON.stringify(obj) 
 })
 `,

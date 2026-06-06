@@ -1,0 +1,4670 @@
+{
+	"openapi": "3.0.0",
+	"info": {
+		"title": "RUTS BACK API",
+		"version": "1.0.0",
+		"description": "API documentation for RUTS backend"
+	},
+	"components": {
+		"schemas": {
+			"Image": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "id изображения"
+					},
+					"alt": {
+						"type": "string",
+						"description": "alt изображения"
+					},
+					"filename": {
+						"type": "string",
+						"description": "Название файла изображения"
+					},
+					"mimeType": {
+						"type": "string",
+						"description": "тип файла"
+					},
+					"filesize": {
+						"type": "number",
+						"description": "размер изображения"
+					},
+					"width": {
+						"type": "number",
+						"description": "ширина изображения"
+					},
+					"height": {
+						"type": "number",
+						"description": "высота изображения"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Дата вермя создания изображения"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Дата время последнего обновления изображения"
+					},
+					"url": {
+						"type": "string",
+						"format": "url",
+						"description": "Ссылка на изображение, требует обработки на фронте подставляется после адреса бэкенда"
+					}
+				}
+			},
+			"Slot": {
+				"type": "object",
+				"description": "Слот",
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": ""
+					},
+					"name": {
+						"type": "string",
+						"description": "Название"
+					},
+					"price": {
+						"type": "number",
+						"description": "Цена"
+					},
+					"distance": {
+						"type": "number",
+						"description": "Дистанция"
+					},
+					"quantitySpace": {
+						"type": "number",
+						"description": "Количество мест"
+					},
+					"generateFrom": {
+						"type": "number",
+						"description": "Номера участников от"
+					},
+					"generateTo": {
+						"type": "number",
+						"description": "Номера участников до"
+					},
+					"currentNumber": {
+						"type": "number"
+					},
+					"close": {
+						"type": "boolean",
+						"description": "Регистрация закрыта"
+					}
+				}
+			}
+		}
+	},
+	"paths": {
+		"/code/send": {
+			"post": {
+				"summary": "Отправить код подтверждения на почту",
+				"tags": [
+					"Авторизация / Регистрация"
+				],
+				"description": "Отправляет код подтверждения на указанный адрес электронной почты.",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты пользователя"
+									}
+								},
+								"required": [
+									"email"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешное отправление кода подтверждения",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string",
+											"example": "Код подтверждения успешно отправлен.",
+											"description": "Код подтверждения успешно отправлен."
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Неверный запрос. Некорректный адрес электронной почты"
+					},
+					"409": {
+						"description": "Конфликт. Пользователь с указанным адресом электронной почты уже существует"
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/code/check": {
+			"post": {
+				"summary": "Проверить правильность ввода кода подтверждения",
+				"description": "Проверяет код подтверждения, введенный пользователем, на соответствие отправленному на указанный адрес электронной почты.",
+				"tags": [
+					"Авторизация / Регистрация"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты пользователя"
+									},
+									"code": {
+										"type": "string",
+										"description": "Код подтверждения, полученный пользователем"
+									}
+								},
+								"required": [
+									"email",
+									"code"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешная проверка кода подтверждения",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "integer",
+											"example": 200,
+											"description": "Статус кода подтверждения"
+										},
+										"message": {
+											"type": "string",
+											"example": "Коды совпали.",
+											"description": "Коды совпали."
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Неверный запрос. Некорректный код подтверждения или адрес электронной почты"
+					},
+					"410": {
+						"description": "Устаревший код подтверждения. Вернитесь назад и получите новый код"
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/auth/google": {
+			"get": {
+				"summary": "Авторизация через Google",
+				"tags": [
+					"Авторизация / Регистрация"
+				],
+				"description": "Инициирует процесс авторизации через Google. Нужно перейти по данной странице, а не просто выполнить запрос.",
+				"responses": {
+					"400": {
+						"description": "Сервис недоступен"
+					}
+				}
+			}
+		},
+		"/auth/vk/confirm": {
+			"get": {
+				"summary": "Подтверждение авторизации через VK",
+				"tags": [
+					"Авторизация / Регистрация"
+				],
+				"description": "Инициирует процесс подтверждения авторизации через VK. Нужно перейти по данной странице, а не просто выполнить запрос.",
+				"responses": {
+					"400": {
+						"description": "Сервис недоступен"
+					}
+				}
+			}
+		},
+		"/auth/signup": {
+			"post": {
+				"summary": "Регистрация пользователя",
+				"description": "Эндпоинт регистрации пользователя. Позволяет пользователю зарегистрироваться (быть добавленным в БД) по адресу почты и паролю.",
+				"tags": [
+					"Авторизация / Регистрация"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string",
+										"description": "User email address"
+									},
+									"password": {
+										"type": "string",
+										"description": "User password"
+									},
+									"confirmPassword": {
+										"type": "string",
+										"description": "Confirmation of user password"
+									}
+								},
+								"required": [
+									"email",
+									"password",
+									"confirmPassword"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Успешная регистрация пользователя",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"_id": {
+											"type": "string",
+											"description": "User ID"
+										},
+										"email": {
+											"type": "string",
+											"description": "User email address"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request. Неправильный email или password. Или не совпадают пароли. Или переданы не все данные."
+					},
+					"409": {
+						"description": "Указанный email уже используется другим пользователем. Пожалуйста, введите новую почту."
+					},
+					"410":{
+						"description":"Код подтверждения почты уже истек. Вернитесь назад и получите новый код."
+					},
+					"500": {
+						"description": "Internal server error (внутренняя ошибка сервера)."
+					}
+				}
+			}
+		},
+		"/auth/signin": {
+			"post": {
+				"summary": "Вход пользователя",
+				"description": "Аутентификация пользователя по адресу электронной почты и паролю.",
+				"tags": [
+					"Авторизация / Регистрация"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты пользователя"
+									},
+									"password": {
+										"type": "string",
+										"description": "Пароль пользователя"
+									},
+									"remember": {
+										"type": "boolean",
+										"description": "Опция 'Запомнить меня'. Если установлено значение true, пользователь останется авторизованным на длительный срок."
+									}
+								},
+								"required": [
+									"email",
+									"password"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешная аутентификация пользователя",
+						"tags": [
+							"Авторизация / Регистрация"
+						],
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"_id": {
+											"type": "string",
+											"description": "User ID"
+										},
+										"email": {
+											"type": "string",
+											"description": "User email address"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Неверный запрос. Некорректный адрес электронной почты или пароль"
+					},
+					"401": {
+						"description": "Ошибка аутентификации. Неправильный адрес электронной почты или пароль"
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/auth/logout": {
+			"post": {
+				"summary": "Выход пользователя",
+				"description": "Эндпоинт для выхода пользователя из системы. Удаляет токен аутентификации из куки.",
+				"tags": [
+					"Авторизация / Регистрация"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный выход пользователя",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string",
+											"description": "Сообщение об успешном выходе",
+											"example":"Cookie удалена на клиентской части и на сервере."
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/users/me": {
+			"get": {
+				"summary": "Получить текущего пользователя",
+				"description": "Возвращает информацию о текущем аутентифицированном пользователе.",
+				"tags": [
+					"Авторизация / Регистрация"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешное получение информации о пользователе",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"_id": {
+											"type": "string",
+											"description": "ID пользователя"
+										},
+										"email": {
+											"type": "string",
+											"description": "Адрес электронной почты пользователя"
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Ошибка аутентификации. Требуется аутентификация для доступа к ресурсу"
+					},
+					"404": {
+						"description": "Ресурс не найден. Пользователь не найден"
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/password/recover": {
+			"post": {
+				"summary": "Восстановление пароля",
+				"description": "Отправляет инструкции по восстановлению пароля на указанный адрес электронной почты.",
+				"tags": [
+					"Восстановление пароля"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты пользователя"
+									}
+								},
+								"required": [
+									"email"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешное восстановление пароля",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string",
+											"example": "Инструкции по восстановлению пароля отправлены на указанный адрес электронной почты."
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Неверный запрос. Пользователь с указанным адресом электронной почты не найден."
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/password/check/{id}/{token}": {
+			"get": {
+				"summary": "Проверить действительность токена восстановления пароля",
+				"description": "Проверяет, действителен ли предоставленный токен для восстановления пароля.",
+				"tags": [
+					"Восстановление пароля"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID пользователя",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "token",
+						"in": "path",
+						"description": "Токен для восстановления пароля",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Токен действителен."
+					},
+					"400": {
+						"description": "Неверный запрос. Недействительный токен."
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/password/reset/{id}/{token}": {
+			"post": {
+				"summary": "Сброс пароля",
+				"description": "Сбрасывает пароль пользователя.",
+				"tags": [
+					"Восстановление пароля"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID пользователя",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "token",
+						"in": "path",
+						"description": "Токен для восстановления пароля",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"password": {
+										"type": "string",
+										"description": "Новый пароль"
+									}
+								},
+								"required": [
+									"password"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Пароль успешно обновлен."
+					},
+					"400": {
+						"description": "Неверный запрос. Недействительный токен или ID пользователя."
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/mainpage": {
+			"get": {
+				"summary": "Главная страница RUTS",
+				"description": "Эндпоинты главной страницы. Позволяют получить данные о всех Блоках: О нас, Города RUTS, Смотри как это было, Партнеры",
+				"tags": [
+					"Главная страница"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"cities": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id":{
+														"type": "string",
+														"example":"69d0caded6c361a82ac76615",
+														"description": "id генерируется mongo"
+													},
+													"eventName": {
+														"type": "string",
+														"example":"Казань"
+													},
+													"date": {
+														"type": "string",
+														"format": "date-time",
+														"description": "Дата в формате ISO 8601 (UTC)"
+													},
+													"city": {
+														"type": "string",
+														"example":"Казань"
+													},
+													"photo":{
+														"type": "string",
+														"format": "url",
+														"example":"https://minio...",
+														"description": "Основное фото события (изображение)"
+													},
+													"media": {
+														"type": "string",
+														"format": "url",
+														"example":"https://minio...",
+														"description": "Дополнительное медиа (видео, галерея)"
+													}
+												}
+											},
+											"description": "Блок Города RUTS. Массив из объектов [{'EventsOrdersName: string', 'date: Date', 'city: string', 'media: string (URL)'}]"
+										},
+										"blockCorporateParticipation": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"media": {
+														"type": "string",
+														"format": "url",
+														"example":"https://minio...",
+														"description": "Ссылка на медиа"
+													}
+												}
+											}
+										},
+										"howItWas": {
+											"type": "array",
+											"items": {
+												"type":"object",
+												"properties":{
+													"name":{
+														"type": "string",
+        												"example": "Калининград",
+        												"description": "Название города"
+													},
+													"video":{
+														"type":"string",
+														"example": "<iframe src=\"https://vkvideo.ru...></iframe>",
+														"description": "HTML-код iframe для встраивания видео (VK, YouTube)"
+													},
+													"videoPreview":{
+														"type": "string",
+        												"format": "uri",
+        												"example": "https://img.youtube.com/vi/false/maxresdefault.jpg",
+        												"description": "URL превью видео"
+													},
+													"reviews": {
+        												"type": "array",
+        												"description": "Массив отзывов участников",
+       	 												"items": {
+															"type": "object",
+															"properties": {
+																"id": {
+																"type": "string",
+																"example": "685facd2e3abee000196fd71",
+																"description": "Уникальный идентификатор отзыва"
+																},
+																"name": {
+																"type": "string",
+																"example": "Ирина Г.",
+																"description": "Имя автора отзыва"
+																},
+																"date": {
+																"type": "string",
+																"format": "date-time",
+																"description": "Дата отзыва в формате ISO 8601"
+																},
+																"text": {
+																"type": "string",
+																"example": "На старте целевого забега...",
+																"description": "Текст отзыва"
+																}
+															}
+														}
+													}
+												}
+											},
+											"description": "Смотри как это было. Массив из объектов [{'title: string, 'media': string (URL), 'feedback': {'login': string, 'text': string}}]"
+										},
+										"partners": {
+											"type": "object",
+											"properties":{
+												"mainPartner":{
+													"type": "object",
+													"description": "Главный партнер",
+													"properties":{
+														"name":{
+															"type": "string",
+															"example":"Volt Rush",
+															"description": "Название компании-партнёра"
+														},
+														"photo":{
+															"type": "string",
+          													"format": "uri",
+          													"example": "https://minio...",
+          													"description": "Логотип партнёра (URL)"
+														}
+													}
+												},
+												"partners":{
+													"type":"array",
+													"description": "Список остальных партнёров",
+													"items":{
+														"type": "object",
+														"properties": {
+															"name": {
+																"type": "string",
+																"example": "Nova Drive",
+																"description": "Название компании-партнёра"
+															},
+																"photo": {
+																"type": "string",
+																"format": "uri",
+																"example": "https://minio...",
+																"description": "Логотип партнёра (URL)"
+															}
+														}
+													}
+												}
+
+											},											
+											"description": "Партнеры. Массив из объектов [{'name': string, 'media': string (URL)}]"
+										},
+										"blockWhatIsRuts": {
+											"type": "object",
+											"properties": {
+												"firstslide": {
+													"type": "object",
+													"description": "Первый слайд: заголовок, текст, два изображения",
+													"properties": {
+														"title": {
+															"type": "string",
+															"example": "Урбан трейл — необычный забег",
+															"description": "Заголовок первого слайда"
+														},
+														"text": {
+															"type": "string",
+															"example": "Маршрут проходит не только по дорогам...",
+															"description": "Текст первого слайда"
+														},
+														"mainmedia": {
+															"type": "string",
+															"format": "url",
+															"example": "https://minio...",
+															"description": "Основное изображение"
+														},
+														"sidemedia": {
+															"type": "string",
+															"format": "url",
+															"example": "https://minio...",
+															"description": "Второстепенное изображение"
+														}
+													}
+												},
+												"secondslide": {
+													"type": "object",
+													"description": "Второй слайд: заголовок, текст, одно изображение",
+													"properties": {
+														"title": {
+															"type": "string",
+															"example": "РУТС — это бег в удовольствие с культурной начинкой",
+															"description": "Заголовок второго слайда"
+														},
+														"text": {
+															"type": "string",
+															"example": "Музеи, галереи, парки, театры...",
+															"description": "Текст второго слайда"
+														},
+														"media": {
+															"type": "string",
+															"format": "url",
+															"example": "https://minio...",
+															"description": "Изображение ко второму слайду"
+														}
+													}
+												},
+												"thirdslide": {
+													"type": "object",
+													"description": "Третий слайд: видео (iframe)",
+													"properties": {
+														"texturl": {
+															"type": "string",
+															"format": "url",
+															"example": "<iframe src=\"https://vkvideo.ru/...></iframe>",
+          													"description": "HTML-код iframe для встраивания видео (VK, YouTube)"
+														}
+													}
+												}
+											},
+											"description": "Блок «Что такое RUTS?» — три слайда, объясняющих концепцию проекта"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mainpage/cities": {
+			"get": {
+				"summary": "Получить информацию о городах RUTS",
+				"description": "Возвращает информацию о городах RUTS",
+				"tags": [
+					"Главная страница"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string",
+												"description": "Id события",
+												"example":"69d0caded6c361a82ac76615"
+											},
+											"eventName": {
+												"type": "string",
+												"description": "Название события",
+												"example":"Казань"
+											},
+											"date": {
+												"type": "string",
+												"format": "date-time",
+												"description": "Дата в формате ISO 8601"
+											},
+											"city": {
+												"type": "string",
+												"description": "Название города",
+												"example":"Казань"
+											},
+											"cityLink": {
+												"type": "string",
+												"description": "Ссылка на событие города",
+												"example": "https://minio..."
+											},
+											"media": {
+												"type": "string",
+												"format": "url",
+												"description": "Ссылка на медиа",
+												"example": "https://minio..."
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mainpage/banner": {
+			"get": {
+				"summary": "Получить баннер главной",
+				"description": "Возвращает данные для баннера на главной странице",
+				"tags": [
+					"Главная страница"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"visible": {
+											"type": "boolean",
+											"description": "Видимость баннера для пользователей"
+										},
+										"title": {
+											"type": "string",
+											"description": "Заголовок",
+											"example":"Run Fresh"
+										},
+										"text": {
+											"type": "string",
+											"description": "Текст баннера",
+											"example":"Освежись на каждом километре! Наш прохладительный..."
+										},
+										"buttonText": {
+											"type": "string",
+											"description": "Текст на кнопке",
+											"example":"Освежиться"
+										},
+										"buttonUrl": {
+											"type": "string",
+											"format": "url",
+											"example":"https://www.zebra.com/es/es.html",
+											"description": "Сслыка для кнопки"
+										},
+										"image": {
+											"type": "string",
+											"format": "url",
+											"description": "Ссылка на изображение",
+											"example": "https://minio..."
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mainpage/year": {
+			"get": {
+				"summary": "Получить баннер главной",
+				"description": "Возвращает данные для баннера на главной странице",
+				"tags": [
+					"Главная страница"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"year": {
+											"type": "number",
+											"description": "Год для заголовка Города РУТС"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mainpage/corporate": {
+			"get": {
+				"summary": "Получить информацию о корпоратиных участиях",
+				"description": "Возвращает информацию о корпоратиных участиях",
+				"tags": [
+					"Главная страница"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"media": {
+												"type": "string",
+												"format": "url",
+												"description": "Ссылка на медиа",
+												"example": "https://minio..."
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mainpage/howItWas": {
+			"get": {
+				"summary": "Получить информацию о блоке Смотри как это было",
+				"description": "Возвращает информацию о блоке Смотри как это было",
+				"tags": [
+					"Главная страница"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"name": {
+												"type": "string",
+												"description": "Заголовок",
+												"example":"Калининград"
+											},
+											"video": {
+												"type": "string",
+												"format": "url",
+												"description": "Ссылка на медиа",
+												"example":"<iframe src=\"https://vkvideo.ru...></iframe>"
+											},
+											"videoPreview": {
+												"type": "string",
+												"format": "url",
+												"description": "Превью на медиа",
+												"example":"https://img.youtube.com/vi/false/maxresdefault.jpg"
+											},
+											"reviews": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string",
+															"description": "ID отзыва",
+															"example":"685facd2e3abee000196fd71"
+														},
+														"name": {
+															"type": "string",
+															"description": "Имя пользователя",
+															"example":"Ирина Г."
+														},
+														"text": {
+															"type": "string",
+															"description": "Текст отзыва",
+															"example":"На старте целевого забега..."
+														},
+														"date": {
+															"type": "string",
+															"description": "Дата в формате ISO 8601 (UTC)"
+														}
+													},
+													"description": "Отзыв"
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mainpage/whatisruts": {
+			"get": {
+				"summary": "Получить информацию о блоке \"Что такое Ruts?\"",
+				"description": "Возвращает информацию о блоке \"Что такое Ruts?\"",
+				"tags": [
+					"Главная страница"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"firstslide": {
+											"type": "object",
+											"description": "Первый слайд: заголовок, текст, два изображения",
+											"properties": {
+												"title": {
+													"type": "string",
+													"example": "Урбан трейл — необычный забег",
+													"description": "Заголовок первого слайда"
+												},
+												"text": {
+													"type": "string",
+													"example": "Маршрут проходит не только по дорогам...",
+													"description": "Текст первого слайда"
+												},
+												"mainmedia": {
+													"type": "string",
+													"format": "url",
+													"example":"https://minio...",
+													"description": "Основное изображение"
+												},
+												"sidemedia": {
+													"type": "string",
+													"format": "url",
+													"example":"https://minio...",
+													"description": "Второстепенное изображение"
+												}
+											}
+										},
+										"secondslide": {
+											"type": "object",
+											"description": "Второй слайд: заголовок, текст, одно изображение",
+											"properties": {
+												"title": {
+													"type": "string",
+													"example": "РУТС — это бег в удовольствие с культурной начинкой",
+													"description": "Заголовок второго слайда"
+												},
+												"text": {
+													"type": "string",
+													"example":"Музеи, галереи, парки, театры...",
+													"description": "Текст второго слайда"
+												},
+												"media": {
+													"type": "string",
+													"format": "url",
+													"example":"https://minio...",
+													"description": "Изображение ко второму слайду"
+												}
+											}
+										},
+										"thirdslide": {
+											"type": "object",
+											"properties": {
+												"texturl": {
+													"type": "string",
+													"format": "url",
+													"example":"<iframe src=\"https://vkvideo.ru...></iframe>",
+													"description": "HTML-код iframe для встраивания видео (VK, YouTube)"
+												}
+											}
+										}
+									},
+									"description": "Блок «Что такое RUTS?» — три слайда, объясняющих концепцию проекта"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mainpage/partners": {
+			"get": {
+				"summary": "Получить информацию о партнерах",
+				"description": "Возвращает информацию о партнерах, включая название и ссылку на медиа.",
+				"tags": [
+					"Главная страница"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"mainPartner": {
+											"type": "object",
+											"properties": {
+												"name": {
+													"type": "string",
+													"description": "Имя главного партнера",
+													"example":"Volt Rush"
+												},
+												"photo": {
+													"type": "string",
+													"format": "url",
+													"description": "Ссылка на фотографию",
+													"example":"https://minio..."
+												}
+												
+											}
+										},
+										"partners": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"name": {
+														"type": "string",
+														"description": "Имя партнера",
+														"example":"Nova Drive"
+													},
+													"photo": {
+														"type": "string",
+														"format": "url",
+														"description": "Ссылка на фотографию",
+														"example":"https://minio..."
+													}
+													
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mainpage/question": {
+			"post": {
+				"summary": "Отправить письмо с вопросом на почту RUTS",
+				"description": "Отправляет письмо (фио, email, сообщение) на адрес электронной почты RUTS",
+				"tags": [
+					"Главная страница"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"fio": {
+										"type": "string",
+										"description": "Фамилия и имя отправителя (2 слова одной строкой)"
+									},
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты отправителя"
+									},
+									"message": {
+										"type": "string",
+										"description": "Сообщение отправителя"
+									}
+								},
+								"required": [
+									"fio",
+									"email",
+									"message"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешное отправление письма",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"example":"Успешная отправка письма",
+											"description":"Сообщение об успешной отправке"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mainpage/reqcity": {
+			"post": {
+				"summary": "Отправить письмо с заявкой города на почту RUTS",
+				"description": "Отправляет письмо (фио, email, город) на адрес электронной почты RUTS",
+				"tags": [
+					"Главная страница"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"fio": {
+										"type": "string",
+										"description": "ФИО отправителя"
+									},
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты отправителя"
+									},
+									"message": {
+										"type": "string",
+										"description": "Сообщение отправителя"
+									}
+								},
+								"required": [
+									"fio",
+									"email",
+									"message"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешное отправление письма",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"example":"Успешная отправка письма",
+											"description":"Сообщение об успешной отправке"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/profile/usertitledata": {
+			"get": {
+				"summary": "Секция Профиль. Краткая информация о пользователе",
+				"description": "Возвращает информацию о телефоне, почте и городе",
+				"tags": [
+					"Личный кабинет"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"name": {
+											"type": "string",
+											"description": "Имя"
+										},
+										"surname": {
+											"type": "string",
+											"description": "Фамилия"
+										},
+										"middlename": {
+											"type": "string",
+											"description": "Отчество"
+										},
+										"phone": {
+											"type": "string",
+											"description": "Телефон"
+										},
+										"email": {
+											"type": "string",
+											"description": "Почта"
+										},
+										"city": {
+											"type": "string",
+											"description": "Город"
+										}
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/profile/achievements": {
+			"get": {
+				"summary": "Секция Профиль. Информация о достижениях",
+				"description": "Возвращает информацию о количестве пройденных событий, расстоянию в км, локациях",
+				"tags": [
+					"Личный кабинет"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"countEvents": {
+											"type": "number",
+											"description": "Количество событий"
+										},
+										"sumDistance": {
+											"type": "number",
+											"description": "Пройденная дистанция"
+										},
+										"countLocations": {
+											"type": "number",
+											"description": "Количество локаций"
+										}
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/profile/nextevents": {
+			"get": {
+				"summary": "Секция Профиль. Информация о предстоящих событиях",
+				"description": "Возвращает информацию о предстоящих событиях",
+				"tags": [
+					"Личный кабинет"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string",
+												"description": "Id события",
+												"example":"685facb73a6917d14b8b2f47"
+											},
+											"photo": {
+												"type": "string",
+												"format": "url",
+												"description": "Ссылка на фотографию",
+												"example":"https://minio..."
+											},
+											"date": {
+												"type": "string",
+												"format": "date-time",
+												"description": "Дата события"
+											},
+											"city": {
+												"type": "string",
+												"description": "Город события"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/profile/myevents": {
+			"get": {
+				"summary": "Секция Мои забеги. Информация о купленных событиях",
+				"description": "Возвращает информацию о купленных событиях",
+				"tags": [
+					"Личный кабинет"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string",
+												"description": "Id события",
+												"example":"685facb73a6917d14b8b2f47"
+											},
+											"photo": {
+												"type": "string",
+												"format": "url",
+												"description": "Ссылка на фотографию",
+												"example":"https://minio..."
+											},
+											"date": {
+												"type": "string",
+												"format": "date-time",
+												"description": "Дата события"
+											},
+											"city": {
+												"type": "string",
+												"description": "Город события"
+											},
+											"countPeople": {
+												"type": "number",
+												"description": "Количество людей"
+											},
+											"isPaid": {
+												"type": "boolean",
+												"description": "Статус оплаты"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/profile/commands": {
+			"get": {
+				"summary": "Секция Беговые клубы. Информация о беговых клубах",
+				"description": "Возвращает информацию о беговых клубах",
+				"tags": [
+					"Личный кабинет"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string",
+												"description": "id команды",
+												"example":"6862c67bc90c8421f8a59e32"
+											},
+											"photo": {
+												"type": "string",
+												"format": "url",
+												"description": "Ссылка на фотографию",
+												"example":"https://minio..."
+											},
+											"name": {
+												"type": "string",
+												"description": "Имя команды"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Отправить письмо с заявкой на создание Бегового клуба на почту RUTS",
+				"description": "Отправляет письмо (имя клуба, email) на адрес электронной почты RUTS",
+				"tags": [
+					"Личный кабинет"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"clubName": {
+										"type": "string",
+										"description": "Имя клуба"
+									},
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты отправителя"
+									}
+								},
+								"required": [
+									"clubName",
+									"email"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешное отправление письма"
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/profile/userdata": {
+			"get": {
+				"summary": "Секция Данные пользователя. Полная информация о пользователе",
+				"description": "Возвращает полную информацию о пользователе",
+				"tags": [
+					"Личный кабинет"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"name": {
+											"type": "string",
+											"description": "Имя"
+										},
+										"surname": {
+											"type": "string",
+											"description": "Фамилия"
+										},
+										"middlename": {
+											"type": "string",
+											"description": "Отчество"
+										},
+										"gender": {
+											"type": "string",
+											"description": "Пол"
+										},
+										"birthday": {
+											"type": "string",
+											"format": "date-time",
+											"description": "Дата рождения"
+										},
+										"numberPhone": {
+											"type": "string",
+											"description": "Номер телефона"
+										},
+										"extraPhone": {
+											"type": "string",
+											"description": "Экстренный номер"
+										},
+										"region": {
+											"type": "string",
+											"description": "Регион"
+										},
+										"city": {
+											"type": "string",
+											"description": "Город"
+										},
+										"email": {
+											"type": "string",
+											"description": "Почта"
+										},
+										"profession": {
+											"type": "string",
+											"description": "Профессия"
+										},
+										"command": {
+											"type": "string",
+											"description":"ID команды",
+											"example":"6862c67bc90c8421f8a59e32"
+										},
+										"photo": {
+											"type": "string",
+											"format": "url",
+											"description": "Фотография",
+											"example":"https://minio..."
+										}
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"summary": "Секция Данные пользователя. Отправить path запрос на обновление данных",
+				"description": "Обновление данных",
+				"tags": [
+					"Личный кабинет"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"description": "Имя"
+									},
+									"surname": {
+										"type": "string",
+										"description": "Фамилия"
+									},
+									"middlename": {
+										"type": "string",
+										"description": "Отчество"
+									},
+									"gender": {
+										"type": "string",
+										"description": "Пол",
+										"example":"Мужской | Женский",
+										"enum":["Мужской", "Женский"]
+									},
+									"birthday": {
+										"type": "string",
+										"format": "date-time",
+										"description": "Дата рождения"
+									},
+									"numberPhone": {
+										"type": "string",
+										"description": "Номер телефона",
+										"example":"+79999999999 | 89999999999"
+									},
+									"extraPhone": {
+										"type": "string",
+										"description": "Экстренный номер",
+										"example":"+79999999999 | 89999999999"
+									},
+									"region": {
+										"type": "string",
+										"description": "Регион"
+									},
+									"city": {
+										"type": "string",
+										"description": "Город"
+									},
+									"email": {
+										"type": "string",
+										"description": "Почта"
+									},
+									"profession": {
+										"type": "string",
+										"description": "Профессия"
+									},
+									"command": {
+										"type": "string",
+										"description": "Название бегового клуба",
+										"example":"6862c67bc90c8421f8a59e32"
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешное обновление данных"
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}	
+				
+			}
+		},
+		"/profile/password": {
+			"put": {
+				"summary": "Секция Данные пользователя. Отправить put запрос на обновление пароля",
+				"description": "Обновление пароля",
+				"tags": [
+					"Личный кабинет"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"oldPassword": {
+										"type": "string",
+										"description": "Старый пароль"
+									},
+									"password": {
+										"type": "string",
+										"description": "Новый пароль"
+									},
+									"confirmPassword": {
+										"type": "string",
+										"description": "Повторение нового пароля"
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешное обновление данных"
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/profile/avatar": {
+			"put": {
+				"summary": "Секция Данные пользователя. Отправить put запрос на обновление фотографии пользователя",
+				"description": "Обновление фотографии пользователя",
+				"tags": [
+					"Личный кабинет"
+				],
+				"consumes": [
+					"multipart/form-data"
+				],
+				"produces": [
+					"application/json"
+				],
+				"parameters": [
+					{
+						"name": "file",
+						"in": "formData",
+						"description": "Файл для загрузки",
+						"required": true,
+						"type": "file"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешная загрузка фотографии"
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"summary": "Секция Данные пользователя. Отправить get запрос на получение данных для аватара",
+				"description": "Возвращает информацию о аватаре пользователя",
+				"tags": [
+					"Личный кабинет"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"name": {
+											"type": "string",
+											"description": "Имя"
+										},
+										"surname": {
+											"type": "string",
+											"description": "Фамилия"
+										},
+										"middlename": {
+											"type": "string",
+											"description": "Отчество"
+										},
+										"birthday": {
+											"type": "string",
+											"format": "date-time",
+											"description": "Дата рождения"
+										},
+										"numberPhone": {
+											"type": "string",
+											"description": "Номер телефона"
+										},
+										"photo": {
+											"type": "string",
+											"format": "url",
+											"description": "Ссылка на фотографию",
+											"example":"https://minio..."
+										}
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Не авторизован",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties":{
+										"message":{
+											"type":"string",
+											"description":"Сообщение об отсутствии авторизации",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/cities/events": {
+			"get": {
+				"summary": "Получить информацию о предстоящих событиях",
+				"description": "Возвращает информацию о предстоящих событиях не позднее 3 месяцев от текущей даты",
+				"tags": [
+					"Страница Города РУТС"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id":{
+												"type":"string",
+												"description":"ID события",
+												"example":"693f13f0db1ce259778ad529"
+											},
+											"date": {
+												"type": "string",
+												"format": "date-time",
+												"description": "Дата события"
+											},
+											"city": {
+												"type": "string",
+												"description": "Город события"
+											},
+											"cityLink": {
+												"type": "string",
+												"description": "Ссылка на событие города"
+											},
+											"photo": {
+												"type": "string",
+												"format": "url",
+												"description": "Ссылка на фотографию",
+												"example":"https://minio..."
+											},
+											"isPaid": {
+												"type": "boolean",
+												"description": "Статус оплаты для события"
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/cities/partners": {
+			"get": {
+				"summary": "Получить информацию о партнерах",
+				"description": "Возвращает информацию о главном партнере и партнерах",
+				"tags": [
+					"Страница Города РУТС"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"mainPartner": {
+											"type": "object",
+											"properties": {
+												"name": {
+													"type": "string",
+													"description": "Имя партнера"
+												},
+												"photo": {
+													"type": "string",
+													"format": "url",
+													"description": "Ссылка на фотографию",
+													"example":"https://minio..."
+												}
+											}
+										},
+										"partners": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"name": {
+														"type": "string",
+														"description": "Имя партнера"
+													},
+													"photo": {
+														"type": "string",
+														"format": "url",
+														"description": "Ссылка на фотографию",
+														"example":"https://minio..."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/cities/reqcity": {
+			"post": {
+				"summary": "Отправить письмо с заявкой города на почту RUTS",
+				"description": "Отправляет письмо (фио, email, город) на адрес электронной почты RUTS",
+				"tags": [
+					"Страница Города РУТС"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"fio": {
+										"type": "string",
+										"description": "ФИО отправителя"
+									},
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты отправителя"
+									},
+									"message": {
+										"type": "string",
+										"description": "Сообщение отправителя"
+									}
+								},
+								"required": [
+									"fio",
+									"email",
+									"message"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешное отправление письма"
+					}
+				}
+			}
+		},
+		"/api/events/{id}": {
+			"get": {
+				"summary": "Получить все данные о событии",
+				"description": "Штатный PayloadCms ендпоинт, позволяющий разом получить всю информацию о событии и взять из нее только нужные поля.",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"description": "id события"
+										},
+										"name": {
+											"type": "string",
+											"description": "Название события"
+										},
+										"description": {
+											"type": "string",
+											"description": "Подпись события"
+										},
+										"mainPhoto": {
+											"$ref": "#/components/schemas/Image"
+										},
+										"photoSlider": {
+											"type": "array",
+											"items": {
+												"$ref": "#/components/schemas/Image"
+											}
+										},
+										"date": {
+											"type": "string",
+											"format": "date-time",
+											"description": "Дата события"
+										},
+										"location": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string",
+													"description": "Название Маршрута"
+												},
+												"description": {
+													"type": "string",
+													"description": "Описание"
+												},
+												"photo": {
+													"type": "string",
+													"description": "id Фотографии"
+												},
+												"city": {
+													"type": "string",
+													"description": "Город"
+												},
+												"locations": {
+													"type": "array",
+													"description": "Массив локаций",
+													"items": {
+														"type": "object",
+														"description": "Партнер",
+														"properties": {
+															"id": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string",
+																"description": "Название пункта"
+															}
+														}
+													}
+												}
+											}
+										},
+										"city": {
+											"type": "string",
+											"description": "Город события"
+										},
+										"eventType": {
+											"type": "string",
+											"description": "Тип мероприятия"
+										},
+										"countPeople": {
+											"type": "number",
+											"description": "Колличество участников"
+										},
+										"mainPartner": {
+											"type": "object",
+											"description": "Генеральный партнер",
+											"properties": {
+												"id": {
+													"type": "string",
+													"description": ""
+												},
+												"name": {
+													"type": "string",
+													"description": "Название партнера"
+												},
+												"media": {
+													"type": "string",
+													"description": "id изображения. Если к запросу указать ?depth=2 на конце, вместо ID придет полный объект изображения."
+												},
+												"createdAt": {
+													"type": "string",
+													"format": "date-time",
+													"description": "Дата вермя создания партнера"
+												},
+												"updatedAt": {
+													"type": "string",
+													"format": "date-time",
+													"description": "Дата время последнего обновления партнера"
+												},
+												"link": {
+													"type": "string",
+													"description": "Ссылка на партнера"
+												}
+											}
+										},
+										"partners": {
+											"type": "array",
+											"description": "Массив Партнеров",
+											"items": {
+												"type": "object",
+												"description": "Партнер",
+												"properties": {
+													"id": {
+														"type": "string",
+														"description": ""
+													},
+													"name": {
+														"type": "string",
+														"description": "Название партнера"
+													},
+													"media": {
+														"type": "string",
+														"description": "id изображения. Если к запросу указать ?depth=2 на конце, вместо ID придет полный объект изображения."
+													},
+													"createdAt": {
+														"type": "string",
+														"format": "date-time",
+														"description": "Дата вермя создания партнера"
+													},
+													"updatedAt": {
+														"type": "string",
+														"format": "date-time",
+														"description": "Дата время последнего обновления партнера"
+													},
+													"link": {
+														"type": "string",
+														"description": "Ссылка на партнера"
+													}
+												}
+											}
+										},
+										"timings": {
+											"type": "array",
+											"description": "Расписание",
+											"items": {
+												"type": "object",
+												"properties": {
+													"nameTime": {
+														"type": "string",
+														"description": "Название"
+													},
+													"time": {
+														"type": "string",
+														"description": "Время"
+													},
+													"id": {
+														"type": "string"
+													}
+												}
+											}
+										},
+										"partnerBanner": {
+											"type": "object",
+											"description": "Баннер партнера",
+											"properties": {
+												"description": {
+													"type": "string",
+													"description": "Описание"
+												},
+												"photo": {
+													"$ref": "#/components/schemas/Image"
+												},
+												"link": {
+													"type": "string",
+													"description": "Ссылка на сайт партнера"
+												}
+											}
+										},
+										"slotsDefault": {
+											"type": "array",
+											"items": {
+												"$ref": "#/components/schemas/Slot"
+											}
+										},
+										"slotsCorporate": {
+											"type": "array",
+											"items": {
+												"$ref": "#/components/schemas/Slot"
+											}
+										},
+										"slug": {
+											"type": "string"
+										},
+										"visibleGuide": {
+											"type": "boolean",
+											"description": "Отображать кнопку Гайд"
+										},
+										"visibleRegulations": {
+											"type": "boolean",
+											"description": "Отображать кнопку Регламент"
+										},
+										"createdAt": {
+											"type": "string",
+											"format": "date-time",
+											"description": "Дата время создания партнера"
+										},
+										"updatedAt": {
+											"type": "string",
+											"format": "date-time",
+											"description": "Дата время последнего обновления партнера"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/title/{id}": {
+			"get": {
+				"summary": "Получить информацию о заголовке События",
+				"description": "Заголовок, подпись, время проведения и фотографии",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"title": {
+											"type": "string",
+											"description": "Название события"
+										},
+										"description": {
+											"type": "string",
+											"description": "Подпись события"
+										},
+										"date": {
+											"type": "string",
+											"format": "date-time",
+											"description": "Дата события"
+										},
+										"city": {
+											"type": "string",
+											"description": "Город события"
+										},
+										"cityLink": {
+											"type": "string",
+											"description": "Ссылка на событие города"
+										}	
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/buttons/{id}": {
+			"get": {
+				"summary": "Получить информацию о статусе отображения кнопок События",
+				"description": "Отображать/не отображать",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"visibleGuide": {
+											"type": "boolean",
+											"description": "Отображать или не отображать кнопку гайда"
+										},
+										"visibleRegulation": {
+											"type": "boolean",
+											"description": "Отображать или не отображать кнопку регламента"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/location/{id}": {
+			"get": {
+				"summary": "Получить информацию о Маршруте События",
+				"description": "Заголовок, карта маршрута (ссылка на изображение), массив локаций",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"title": {
+											"type": "string",
+											"description": "Заголовок машрута (например, 'Там, где вы еще не бегали! Стартовый городок... и т.д.')"
+										},
+										"map": {
+											"type": "string",
+											"format": "url",
+											"description": "Ссылка на карту маршрута",
+											"example":"https://minio..."
+										},
+										"locations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"name": {
+														"type": "string",
+														"description": "Название локации"
+													},
+													"id": {
+														"type": "string",
+														"description": "id (можно не использовать)"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/mainphoto/{id}": {
+			"get": {
+				"summary": "Получить главное фото для баннера",
+				"description": "Баннер на странице события",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"url": {
+											"type": "string",
+											"format": "url",
+											"description": "Сслыка на изображение",
+											"example":"https://minio..."											
+										},
+										"alt": {
+											"type": "string",
+											"description": "Альт Тег изображения"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/photoslider/{id}": {
+			"get": {
+				"summary": "Получить массив фотографий для слайдера",
+				"description": "",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"url": {
+												"type": "string",
+												"format": "url",
+												"description": "Ссылка на изображение",
+												"example":"https://minio..."
+											},
+											"alt": {
+												"type": "string",
+												"description": "Alt - тег"
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/getmap/{id}": {
+			"get": {
+				"summary": "Получить файл карты События",
+				"description": "Получить файл карты События",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"title": {
+											"type": "file",
+											"description": "Карта"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/infoslots/{id}": {
+			"get": {
+				"summary": "Получить информацию о слотах события (стоимость участия, волны)",
+				"description": "Название волны, количество свободных мест, стоимость, статус",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200":{
+						"description": "Успешный ответ",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type": "object",
+									"properties":{
+										"hasPricingPeriods":{
+											"type": "boolean",
+                  							"example": true,
+                  							"description": "Флаг: используются ли периоды ценообразования (раннее бронирование)"
+										},
+										"isEventClosed": {
+											"type": "boolean",
+                  							"example": false,
+                  							"description": "Флаг: закрыта ли регистрация на событие"
+										},
+										"periods":{
+											"type": "array",
+											"description": "Периоды ценообразования (актуально, если hasPricingPeriods = true)",
+											"items":{
+												"type": "object",
+												"properties":{
+													"periodName":{
+														"type": "string",
+                        								"description": "Название периода"
+													},
+													"periodId":{
+														"type": "string",
+                        								"example": "6a0735a1545456415e7b0ade",
+                        								"description": "Уникальный ID периода"
+													},
+													"price":{
+														"type": "number",                       			
+                        								"description": "Цена участия в этом периоде"
+													},
+													"close":{
+														"type": "boolean",
+                        								"description": "Флаг: закрыт ли период для регистрации"
+													},
+													"isPeriodClosed":{
+														"type": "boolean",
+                        								"description": "флаг закрытия периода(?)"
+													},
+													"status":{
+														"type": "string",
+                        								"example": "Скоро | Регистрация | Sold out",
+                        								"description": "Статус периода (Скоро, Регистрация, Sold out)",
+                        								"enum": ["Sold out", "Регистрация", "Скоро" ]
+													}
+
+												}
+											}
+										},
+										"waves":{
+											"type": "array",
+											"description": "Волны (слоты) участия",
+											"items":{
+												"type": "object",
+												"properties": {
+													"waveName":{
+														"type": "string",
+														"description": "Название волны"
+													},
+													"waveId":{
+														"type": "string",
+														"example": "686055fbe358d72308b39225",
+														"description": "Уникальный ID волны"
+													},
+													"pace":{
+														"type": "string",
+														"example": "easy | medium | fast",
+														"description": "Темп бега (easy, medium, fast)",
+														"enum": ["easy", "medium", "fast"]
+													},
+													"price":{
+														"type": "number",
+														"description": "Цена участия"
+													},
+													"status":{
+														"type": "string",
+                        								"example": "Скоро | Регистрация | Sold out",
+                        								"description": "Статус периода (Скоро, Регистрация, Sold out)",
+                        								"enum": ["Sold out", "Регистрация", "Скоро" ]
+													},
+													"isWaveClosed":{
+														"type": "boolean",
+														"description": "Флаг: закрыта ли волна для регистрации"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/partner-banner/{id}": {
+			"get": {
+				"summary": "Получить информацию для баннера генерального партнёра",
+				"description": "Текст для баннера, фото, ссылка",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"description": {
+											"type": "string",
+											"description": "Описание"
+										},
+										"photo": {
+											"type": "string",
+											"description": "Изображение партнёра",
+											"format": "url",
+											"example":"https://minio..."
+										},
+										"link": {
+											"type": "string",
+											"description": "Ссылка на сайт партнёра",
+											"format": "url",
+											"example":"https://dev-ruts-2025.lad-academy.ru/"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/timings/{id}": {
+			"get": {
+				"summary": "Получить информацию о расписании события",
+				"description": "Название времени, часы, минуты",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"nameTime": {
+												"type": "string",
+												"description": "Название времени"
+											},
+											"hour": {
+												"type": "number",
+												"description": "Часы"
+											},
+											"minutes": {
+												"type": "number",
+												"description": "Минуты"
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/partners/{id}": {
+			"get": {
+				"summary": "Получить информацию о партнерах",
+				"description": "Возвращает информацию о главном партнере и партнерах",
+				"tags": [
+					"Страница События"
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"mainPartner": {
+											"type": "object",
+											"properties": {
+												"name": {
+													"type": "string",
+													"description": "Имя партнера"
+												},
+												"photo": {
+													"type": "string",
+													"format": "url",
+													"description": "Ссылка на фотографию",
+													"example":"https://minio..."
+												}
+											}
+										},
+										"partners": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"name": {
+														"type": "string",
+														"description": "Имя партнера"
+													},
+													"photo": {
+														"type": "string",
+														"format": "url",
+														"description": "Ссылка на фотографию",
+														"example":"https://minio..."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/howItWas/{id}": {
+			"get": {
+				"summary": "Получить информацию о 'Как это было'",
+				"description": "Ссылка на видеоролик YouTube и превью к видео",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"mediaUrl": {
+											"type": "string",
+											"description": "Ссылка на видеоролик",
+											"example":"https://..."
+										},
+										"mediaPreview": {
+											"type": "string",
+											"description": "Превью",
+											"example":"https://..."
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/howItWasVk/{id}": {
+			"get": {
+				"summary": "Получить информацию о 'Как это было' c VK",
+				"description": "iframe с ВК видео и отзывы",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"video": {
+											"type": "string",
+											"description": "Iframe на видеоролик",
+											"example":"<iframe src=\"https://...></iframe>"
+										},
+										"reviews": {
+											"type": "array",
+											"description": "Отзывы",
+											"items": {
+												"type": "object",
+												"properties": {
+													"name": {
+														"type": "string",
+														"description": "Имя"
+													},
+													"date": {
+														"type": "string",
+														"description": "Дата отзыва"
+													},
+													"text": {
+														"type": "string",
+														"description": "Текст отзыва"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/document/default/{id}": {
+			"get": {
+				"summary": "Получить документ по умолчанию",
+				"description": "Скачать документ по умолчанию для события",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/octet-stream": {
+								"schema": {
+									"type": "string",
+									"format": "binary",
+									"example":"документ"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/document/children/{id}": {
+			"get": {
+				"summary": "Получить документы для детей",
+				"description": "Получить документы для детей по событию",
+				"tags": [
+					"Страница События"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Успешный ответ",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/event/reqcity": {
+			"post": {
+				"summary": "Отправить письмо с заявкой города на почту RUTS",
+				"description": "Отправляет письмо (фио, email, город) на адрес электронной почты RUTS",
+				"tags": [
+					"Страница События"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"fio": {
+										"type": "string",
+										"description": "ФИО отправителя"
+									},
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты отправителя"
+									},
+									"message": {
+										"type": "string",
+										"description": "Сообщение отправителя"
+									}
+								},
+								"required": [
+									"fio",
+									"email",
+									"message"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешная отправка сообщения",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string",
+											"example": "Успешная отправка письма"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Неверный запрос. Отсутствуют обязательные поля или данные некорректны."
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/utils/createCommand": {
+			"post": {
+				"summary": "Отправить письмо с заявкой Корпоративного участия",
+				"description": "Отправляет уведомление о желании создать новую команду на указанный адрес электронной почты.",
+				"tags": [
+					"Отдельное прочее (Отправка сообщений на почту, Корпоративное участие и т.д.)"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"surname": {
+										"type": "string",
+										"description": "Фамилия представителя"
+									},
+									"name": {
+										"type": "string",
+										"description": "Имя представителя"
+									},
+									"phone": {
+										"type": "string",
+										"description": "Номер телефона представителя"
+									},
+									"company": {
+										"type": "string",
+										"description": "Название компании"
+									},
+									"city": {
+										"type": "string",
+										"description": "Город"
+									},
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты представителя"
+									}
+								},
+								"required": [
+									"surname",
+									"name",
+									"phone",
+									"company",
+									"city",
+									"email"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешное создание команды и отправка уведомления",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string",
+											"example": "Успешная отправка письма"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Неверный запрос. Отсутствуют обязательные поля или данные некорректны."
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/utils/joinVolunteer": {
+			"post": {
+				"summary": "Присоединиться волонтером",
+				"description": "Отправляет уведомление о новом желающим быть волонтером на указанный адрес электронной почты.",
+				"tags": [
+					"Отдельное прочее (Отправка сообщений на почту, Корпоративное участие и т.д.)"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"surname": {
+										"type": "string",
+										"description": "Фамилия волонтера"
+									},
+									"name": {
+										"type": "string",
+										"description": "Имя волонтера"
+									},
+									"phone": {
+										"type": "string",
+										"description": "Номер телефона волонтера"
+									},
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты волонтера"
+									}
+								},
+								"required": [
+									"surname",
+									"name",
+									"phone",
+									"email"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешная отправка сообщения",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string",
+											"example": "Успешная отправка письма"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Неверный запрос. Отсутствуют обязательные поля или данные некорректны."
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/utils/joinPartner": {
+			"post": {
+				"summary": "Присоединиться партнером",
+				"description": "Отправляет уведомление о новом желающим быть партнером на указанный адрес электронной почты.",
+				"tags": [
+					"Отдельное прочее (Отправка сообщений на почту, Корпоративное участие и т.д.)"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"description": "Имя и Фамилия партнера (2 слова)"
+									},
+									"phone": {
+										"type": "string",
+										"description": "Номер телефона партнера"
+									},
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты партнера"
+									},
+									"company": {
+										"type": "string",
+										"description": "Организация"
+									},
+									"city": {
+										"type": "string",
+										"description": "Город"
+									}
+								},
+								"required": [
+									"company",
+									"name",
+									"phone",
+									"email",
+									"city"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешная отправка сообщения",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string",
+											"example": "Успешная отправка письма"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Неверный запрос. Отсутствуют обязательные поля или данные некорректны."
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/utils/joinPacemaker": {
+			"post": {
+				"summary": "Присоединиться пейсмейкером",
+				"description": "Отправляет уведомление о новом желающим быть пейсмейкером на указанный адрес электронной почты.",
+				"tags": [
+					"Отдельное прочее (Отправка сообщений на почту, Корпоративное участие и т.д.)"
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"fio": {
+										"type": "string",
+										"description": "Имя и фамилия пейсмейкера"
+									},
+									"phone": {
+										"type": "string",
+										"description": "Номер телефона пейсмейкера"
+									},
+									"city": {
+										"type": "string",
+										"description": "Город пейсмейкера"
+									},
+									"email": {
+										"type": "string",
+										"description": "Адрес электронной почты пейсмейкера"
+									},
+									"pace": {
+										"type": "string",
+										"description": "Темп бега пейсмейкера"
+									},
+									"link": {
+										"type": "string",
+										"description": "Ссылка на соцсети пейсмейкера"
+									},
+									"info": {
+										"type": "string",
+										"description": "Информация о беговом опыте пейсмейкера"
+									}
+								},
+								"required": [
+									"fio",
+									"name",
+									"phone",
+									"email",
+									"pace",
+									"link",
+									"info",
+									"city"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Успешная отправка сообщения",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string",
+											"example": "Успешная отправка письма"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Неверный запрос. Отсутствуют обязательные поля или данные некорректны."
+					},
+					"500": {
+						"description": "Внутренняя ошибка сервера"
+					}
+				}
+			}
+		},
+		"/orders":{
+			"post":{
+				"summary":"Создать ордер (бронирование на забег)",
+				"description":"Забронировать место для участия в забеге для совершения платежа (действует 10 минут)",
+				"tags":[
+					"Платежная система"
+				],
+				"requestBody": {
+					"required":true,
+					"content":{
+						"application/json":{
+							"schema":{
+								"type":"object",
+								"properties":{
+									"eventId": {
+										"type":"string",
+										"example":"685facb73a6917d14b8b2f47",
+										"description":"id события"
+									}, 
+    								"pace":{
+										"type":"string",
+										"example":"easy | medium | fast",
+										"enum":[
+											"easy",
+											"medium",
+											"fast"
+										],
+										"description":"Темп бега. Должен соответствовать параметру волны!"
+									},
+    								"distance":{
+										"type":"number",
+										"description":"Дистанция км, должна соответствовать параметру волны!"
+									},
+    								"command":{
+										"type":"string",
+										"example":"6862c67bc90c8421f8a59e32",
+										"description":"ID команды или не указывать!"
+									},
+    								"slotType": {
+										"type":"string",
+										"example":"slotDefault | slotCorporate",
+										"enum":[
+											"slotDefault",
+											"slotCorporate"
+										],
+										"description":"Тип участия: корпоративное / свободное"
+									},
+   									"slotId":{
+										"type":"string",
+										"example":"68a1f29dfc3fbd6982d52980", 
+										"description":"ID слота из массива внутри события SlotsDefault / slotsCorporate"
+									},
+    								"promocode": {
+										"type":"string",
+										"description":"Промокод (name?) из коллекции promocodes либо не указывать"
+									},
+    								"region": {
+										"type":"string",
+										"description":"Регион"
+									},
+    								"city": {
+										"type":"string",
+										"description":"Город"
+									},
+    								"hasChild": {
+										"type":"boolean",
+										"description":"Будут ли участвовать дети с заявителем?"
+									}, 
+    								"hasDog": {
+										"type":"boolean",
+										"description":"Будет ли участвовать собака с заявителем?"
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses":{
+					"200":{
+						"description":"Успешное создание ордера",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"success":{
+											"type":"boolean",
+											"example":true
+										},
+										"reservation":{
+											"type":"object",
+											"properties":{
+												"orderId":{
+													"type":"string",
+													"example":"6a1f0faada130f0981951e51",
+													"description":"ID ордера"
+												},
+												"reservedUntil":{
+													"type":"string",
+													"format": "date-time",
+													"description":"Срок действия ордера"
+												},
+												"price":{
+													"type":"number",
+													"description":"цена"
+												},
+												"basePrice":{
+													"type":"number",
+													"description":"Базовая цена"
+												},
+												"eventName":{
+													"type":"string",
+													"example":"Нижний Новгород тест",
+													"description":"Название события"
+												},
+												"userData":{
+													"type":"object",
+													"properties":{
+														"name":{
+															"type":"string"
+														},
+														"surname":{
+															"type":"string"
+														},
+														"email":{
+															"type":"string"
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Ошибка авторизации",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"code":{
+											"type":"number",
+											"example":401
+										},
+										"message":{
+											"type":"string",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400(1)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"error":{
+											"type":"array",
+											"items":{
+												"type":"object",
+												"properties":{
+													"field":{
+														"type":"string",
+														"example":"distance"
+													},
+													"message":{
+														"type":"string",
+														"example":"Поле distance обязательно."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400(2)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"error":{
+											"type":"array",
+											"items":{
+												"type":"object",
+												"properties":{
+													"field":{
+														"type":"string",
+														"example":"command"
+													},
+													"message":{
+														"type":"string",
+														"example":"Поле command должно отсутствовать, быть null или быть ObjectId."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400(3)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"error":{
+											"type":"string",
+											"example":"Активный заказ уже есть"
+										}
+									}
+								}
+							}
+						}
+
+					}
+				}
+			},
+			"patch":{
+				"summary":"Редактировать ордер",
+				"description":"Редактировать ордер",
+				"tags":[
+					"Платежная система"
+				],
+				"requestBody": {
+					"required":true,
+					"content":{
+						"application/json":{
+							"schema":{
+								"type":"object",
+								"properties":{
+									"eventId": {
+										"type":"string",
+										"example":"685facb73a6917d14b8b2f47",
+										"description":"id события"
+									}, 
+    								"pace":{
+										"type":"string",
+										"example":"easy | medium | fast",
+										"enum":[
+											"easy",
+											"medium",
+											"fast"
+										],
+										"description":"Темп бега. Должен соответствовать параметру волны!"
+									},
+    								"distance":{
+										"type":"number",
+										"description":"Дистанция км, должна соответствовать параметру волны!"
+									},
+    								"command":{
+										"type":"string",
+										"example":"6862c67bc90c8421f8a59e32",
+										"description":"ID команды или не указывать!"
+									},
+    								"slotType": {
+										"type":"string",
+										"example":"slotDefault | slotCorporate",
+										"enum":[
+											"slotDefault",
+											"slotCorporate"
+										],
+										"description":"Тип участия: корпоративное / свободное"
+									},
+   									"slotId":{
+										"type":"string",
+										"example":"68a1f29dfc3fbd6982d52980", 
+										"description":"ID слота из массива внутри события SlotsDefault / slotsCorporate"
+									},
+    								"promocode": {
+										"type":"string",
+										"description":"Промокод (name?) из коллекции promocodes либо не указывать"
+									},
+    								"region": {
+										"type":"string",
+										"description":"Регион"
+									},
+    								"city": {
+										"type":"string",
+										"description":"Город"
+									},
+    								"hasChild": {
+										"type":"boolean",
+										"description":"Будут ли участвовать дети с заявителем?"
+									}, 
+    								"hasDog": {
+										"type":"boolean",
+										"description":"Будет ли участвовать собака с заявителем?"
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses":{
+					"200":{
+						"description":"Успешное создание ордера",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"success":{
+											"type":"boolean",
+											"example":true
+										},
+										"reservation":{
+											"type":"object",
+											"properties":{
+												"orderId":{
+													"type":"string",
+													"example":"6a1f0faada130f0981951e51",
+													"description":"ID ордера"
+												},
+												"reservedUntil":{
+													"type":"string",
+													"format": "date-time",
+													"description":"Обновленный cрок действия ордера"
+												},
+												"price":{
+													"type":"number",
+													"description":"цена"
+												},
+												"basePrice":{
+													"type":"number",
+													"description":"Базовая цена"
+												},
+												"eventName":{
+													"type":"string",
+													"example":"Нижний Новгород тест",
+													"description":"Название события"
+												},
+												"userData":{
+													"type":"object",
+													"properties":{
+														"name":{
+															"type":"string"
+														},
+														"surname":{
+															"type":"string"
+														},
+														"email":{
+															"type":"string"
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Ошибка авторизации",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"code":{
+											"type":"number",
+											"example":401
+										},
+										"message":{
+											"type":"string",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400(1)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"error":{
+											"type":"array",
+											"items":{
+												"type":"object",
+												"properties":{
+													"field":{
+														"type":"string",
+														"example":"distance"
+													},
+													"message":{
+														"type":"string",
+														"example":"Поле distance обязательно."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400(2)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"error":{
+											"type":"array",
+											"items":{
+												"type":"object",
+												"properties":{
+													"field":{
+														"type":"string",
+														"example":"command"
+													},
+													"message":{
+														"type":"string",
+														"example":"Поле command должно отсутствовать, быть null или быть ObjectId."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+
+					}
+					
+				}
+			}
+		},
+		"orders/user":{
+			"get":{
+				"summary":"Открытые ордера пользователя",
+				"description":"Проверка действующих оредров пользователя",
+				"tags":[
+					"Платежная система"
+				],
+				"responses":{
+					"200":{
+						"description":"Открытые ордера пользователя",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"orders":{
+											"type":"array",
+											"items":{
+												"type":"object",
+												"properties":{
+														"id":{
+														"type":"string",
+														"example":"6a1f0faada130f0981951e51",
+														"description":"ID ордера"
+													},
+													"eventId":{
+														"type":"string",
+														"example":"685facb73a6917d14b8b2f47",
+														"description":"ID события"
+													},
+													"status":{
+														"type":"string",
+														"example":"Ожидает оплаты | Истекло время ожидания оплаты",
+														"enum":[
+															"Ожидает оплаты",
+															"Истекло время ожидания оплаты"
+														],
+														"description":"Статус ордера"
+													},
+													"price":{
+														"type":"number",
+														"description":"цена"
+													},
+													"pace":{
+														"type":"string",
+														"example":"easy | medium | fast",
+														"enum":[
+															"easy",
+															"medium",
+															"fast"
+														],
+														"description":"Темп бега."
+													},
+													"distance":{
+														"type":"number",
+														"description":"Дистанция км."
+													},
+													"createdAt":{
+														"type":"string",
+														"format":"date-time",
+														"description":"Дата создания"
+													},
+													"reservedUntil":{
+														"type":"string",
+														"format":"date-time",
+														"description":"Срок годности (оплатить до)"
+													},
+													"canPay":{
+														"type":"boolean",
+														"example":true,
+														"description":"Можно оплатить?"
+													}
+												}
+											}
+										}
+										
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Ошибка авторизации",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"code":{
+											"type":"number",
+											"example":401
+										},
+										"message":{
+											"type":"string",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+
+					}
+				}
+			}
+		},
+		"orders/user/:oredrId":{
+			"get":{
+				"summary":"Проверить ордер по ID",
+				"description":"Забронировать место для участия в забеге для совершения платежа (действует 10 минут)",
+				"tags":[
+					"Платежная система"
+				],
+				"parameters":[
+					{
+						"name":"oredrId",
+						"in":"path",
+						"description": "ID ордера (можно сделать запрос 'orders/user/' и увидеть доступные ордера)",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses":{
+					"200":{
+						"description":"Успешное создание ордера",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"_id":{
+											"type":"string",
+											"example":"6a1379c310558fece23560d3",
+											"description":"ID заказа (из параметра)"
+										},
+										"idPayment":{
+											"type":"number"
+										},
+										"eventId":{
+											"type":"string",
+											"example":"685facb73a6917d14b8b2f47",
+											"description":"ID события"
+										},
+										"slotType":{
+											"type":"string",
+											"example":"slotDefault | slotCorporate",
+											"enum":[
+												"slotDefault",
+												"slotCorporate"
+											],
+											"description":"Тип участия: корпоративное / свободное"
+										},
+										"slotId":{
+											"type":"string",
+											"example":"68a1f29dfc3fbd6982d52980",
+											"description":"ID слота из массива внутри события SlotsDefault / slotsCorporate"
+										},
+										"price":{
+											"type":"number",
+											"description":"цена"
+										},
+										"userId":{
+											"type":"string",
+											"example":"6a090dff1b00cb5614354c96",
+											"description":"ID пользователя"
+										},
+										"hasChild":{
+											"type":"boolean",
+											"description":"Будут ли участвовать дети с заявителем?"
+										},
+										"hasDog":{
+											"type":"boolean",
+											"description":"Будет ли участвовать собака с заявителем?"
+										},
+										"distance":{
+											"type":"number",
+											"description":"Дистанция км."
+										},
+										"codeOrder":{
+											"type":"string",
+											"example":"Ожидает оплаты | Истекло время ожидания оплаты",
+											"enum":[
+												"Ожидает оплаты",
+												"Истекло время ожидания оплаты"
+											],
+											"description":"Статус оплаты для события"
+										},
+										"timerAlive":{
+											"type":"boolean",
+											"description":"Таймер активен?"
+										},
+										"pace":{
+											"type":"string",
+											"example":"easy | medium | fast",
+											"enum":[
+												"easy",
+												"medium",
+												"fast"
+											],
+											"description":"Темп бега (easy, medium, fast)"
+										},
+										"command":{
+											"type":"number",
+											"example":"6862c67bc90c8421f8a59e32",
+											"description":"ID команды"
+										},
+										"paymentLink":{
+											"type":"string"
+										},
+										"createdAt":{
+											"type":"string",
+											"format":"date-time",
+											"description":"Дата создания в формате ISO 8601"
+										},
+										"updatedAt":{
+											"type":"string",
+											"format":"date-time",
+											"description":"Дата изменения в формате ISO 8601"
+										},
+										"__v":{
+											"type":"number"
+										}
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Ошибка авторизации",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"code":{
+											"type":"number",
+											"example":401
+										},
+										"message":{
+											"type":"string",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400(1)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"error":{
+											"type":"array",
+											"items":{
+												"type":"object",
+												"properties":{
+													"error":{
+														"type":"string",
+														"example":"Cast to ObjectId failed for value \"6a1379c310558fece23560d\" (type string) at path \"_id\" for model \"events_orders\""
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400(2)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"error":{
+											"type":"array",
+											"items":{
+												"type":"object",
+												"properties":{
+													"error":{
+														"type":"string",
+														"example":"Заказ не принадлежит пользователю"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+
+					}
+					
+				}
+			}	
+		},
+		"orders/user/:eventId":{
+			"delete": {
+				"summary": "Удалить ордер по ID события",
+				"description": "Удалить ордер",
+				"tags": [
+					"Платежная система"
+				],
+				"parameters":[
+					{
+						"name":"eventId",
+						"in":"path",
+						"description": "ID события",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses":{
+					"204":{},
+					"401":{
+						"description":"Ошибка авторизации",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"code":{
+											"type":"number",
+											"example":401
+										},
+										"message":{
+											"type":"string",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"error":{
+											"type":"string",
+											"example":"Активный заказ не найден"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payment/create": {
+			"post": {
+				"summary": "Создать платеж",
+				"description": "Создает ссылку для оплаты",
+				"tags": [
+					"Платежная система"
+				],
+				"requestBody": {
+					"required":true,
+					"content":{
+						"application/json":{
+							"schema":{
+								"type":"object",
+								"properties":{
+									"orderId":{
+										"type":"string",
+										"example":"6a20596045651879c1165618", 
+										"description":"ID активного ордера"
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses":{
+					"200":{
+						"description":"Успешное создание ссылки для оплаты",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"paymentLink":{
+											"type":"string",
+											"example":"https://auth.robokassa.ru/Merchant/Index.aspx",
+											"description":"ссылка для оплаты"
+										},
+										"message":{
+											"type":"string",
+											"example":"Ссылка для оплаты создана"
+										},
+										"orderStatus":{
+											"type":"string",
+											"example":"Ожидает оплаты"
+										},
+										"reservedUntil":{
+											"type":"string",
+											"format":"date-time",
+											"description":"Оплатить до!"
+										}
+										
+									}
+								}
+							}
+						}
+					},
+					"401":{
+						"description":"Ошибка авторизации",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"code":{
+											"type":"number",
+											"example":401
+										},
+										"message":{
+											"type":"string",
+											"example":"Токен авторизации отсутствует"
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400(1)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"code":{
+											"type":"number",
+											"example":400
+										},
+										"message":{
+											"type":"string",
+											"example":"Истекло время ожидания оплаты. Пожалуйста, создайте новый заказ."
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400(2)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"code":{
+											"type":"number",
+											"example":400
+										},
+										"message":{
+											"type":"string",
+											"example":"Заказ уже оплачен"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400(3)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"code":{
+											"type":"number",
+											"example":400
+										},
+										"message":{
+											"type":"string",
+											"example":"Время резервирования истекло. Пожалуйста, создайте новый заказ."
+										}
+									}
+								}
+							}
+						}
+					}	
+				}
+			}
+		},
+		"/payment": {
+			"get": {
+				"summary": "Роут для Робокасса (требует доработки)",
+				"description": "Проверка сигнатуры (подленность платежа)",
+				"tags": [
+					"Платежная система"
+				],
+				"parameters":[
+					{
+						"name":"OutSum",
+						"in":"formData",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"desctription":"параметр из ответа /payment/create ключь: paymentLink"
+					},
+					{
+						"name":"InvId",
+						"in":"formData",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"desctription":"параметр из ответа /payment/create ключь: paymentLink"
+					},
+					{
+						"name":"SignatureValue",
+						"in":"formData",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"desctription":"параметр из ответа /payment/create ключь: paymentLink"
+					},
+					{
+						"name":"Shp_eventOrderId",
+						"in":"formData",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"desctription":"параметр из ответа /payment/create ключь: paymentLink"
+					}
+				],				
+				"responses":{
+					"200":{
+						"description":"ок"
+					},
+					"401":{
+						"description":"Ошибка авторизации",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"code":{
+											"type":"number",
+											"example":401
+										},
+										"message":{
+											"type":"string",
+											"example":"Неверные контрольные суммы"
+										}
+									}
+								}
+							}
+						}
+
+					},
+					"400(1)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"error":{
+											"type":"string",
+											"example":"Активный заказ не найден"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400(2)":{
+						"description":"Неверный запрос",
+						"content":{
+							"application/json":{
+								"schema":{
+									"type":"object",
+									"properties":{
+										"error":{
+											"type":"string",
+											"example":"Истекло время ожидания оплаты"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"tags": [
+		{
+			"name": "Главная страница",
+			"description": "Действия, связанные с главной страницей"
+		},
+		{
+			"name": "Авторизация / Регистрация",
+			"description": "Действия, связанные с авторизацией и регистрацией"
+		},
+		{
+			"name": "Восстановление пароля",
+			"description": "Действия, связанные с восстановлением пароля"
+		},
+		{
+			"name": "Личный кабинет",
+			"description": "Действия, связанные с личным кабинетом"
+		},
+		{
+			"name": "Страница Города РУТС",
+			"description": "Действия, связанные со страницей Города РУТС"
+		},
+		{
+			"name": "Страница События",
+			"description": "Действия, связанные со страницей События Города"
+		},
+		{
+			"name": "Отдельное прочее (Отправка сообщений на почту, Корпоративное участие и т.д.)",
+			"description": "Действия с отдельным прочим (Отправка сообщений на почту, Корпоративное участие и т.д.)"
+		},
+		{
+			"name":"Платежная система",
+			"description": "Действия связанные с бронированием мест на забег и оплатой"
+		}
+	]
+}
