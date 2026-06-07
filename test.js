@@ -15,14 +15,14 @@ async function test(){
    })
    if (res1.status>=400) throw new Error ('fuck! ' + res1.status)
    let json1= await res1.json()
-   printObj (json1.user)
+   printR (json1)
    let res2 = await fetch(
-   base+'/user',{
+   base+'/user/with-things/1',{
      credentials: 'include'
    })
    if (res2.status>=400) throw new Error ('fuck! '+res2.status)
    let json2=await res2.json()
-   printObj (...json2.data)
+   printR (json2)
   } catch(err) {
     print(err)
   } finally{
