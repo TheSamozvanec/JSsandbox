@@ -1,8 +1,8 @@
 let base='https://poligon.semov777.com/api'
 async function test(){
   let obj={
-   login:'main',
-   password:'1586'
+   login:'',
+   password:''
   }
    let body=JSON.stringify(obj)
   try{
